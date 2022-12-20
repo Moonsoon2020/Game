@@ -117,3 +117,8 @@ if __name__ == '__main__':
         board.render(screen, cord, (WIDTH // SIZE_MAP_IN_WINDOW, HEIGHT // SIZE_MAP_IN_WINDOW))
         pygame.display.flip()
         clock.tick(FPS)
+
+
+print()
+print()
+print()
