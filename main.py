@@ -13,7 +13,7 @@ SIZE_MAP_IN_WINDOW = 12
 RES_MAP = 60
 RES_RUD = 10
 
-# c dfvb bdfufq
+
 class Board:
     # создание поля
     def __init__(self, width, height):
