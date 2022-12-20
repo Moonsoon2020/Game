@@ -18,7 +18,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
-
+#fwefwfwfwfwfwfwfwf
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     try:
@@ -64,7 +64,8 @@ def generate_level(level):
     # вернем игрока, а также размер поля в клетках            
     return new_player, x, y
 
-
+print()
+print()
 def terminate():
     pygame.quit()
     sys.exit()
