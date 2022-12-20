@@ -18,7 +18,8 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
-#fwefwfwfwfwfwfwfwf
+
+# fwefwfwfwfwfwfwfwf
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     try:
@@ -64,8 +65,11 @@ def generate_level(level):
     # вернем игрока, а также размер поля в клетках            
     return new_player, x, y
 
+
 print()
 print()
+
+
 def terminate():
     pygame.quit()
     sys.exit()
@@ -148,6 +152,12 @@ class Camera:
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
+
+    print(12113)
+
+    print(12113)
+    print(12113)
+    print(12113)
 
 
 start_screen()
