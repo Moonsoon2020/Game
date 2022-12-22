@@ -15,9 +15,9 @@ HEIGHT = 600
 STEP = 10
 SIZE_WINDOW = WIDTH, HEIGHT
 SIZE_MAP = 500, 500
-TILE_WIDTH = 50
-RES_MAP = 30
-RES_RUD = 10
+TILE_WIDTH = 20
+RES_MAP = 20
+RES_RUD = 5
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -40,7 +40,7 @@ def load_image(name, color_key=None):
     return image
 
 
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'omeg': load_image('omeg.png'),
+tile_images = {'wall': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'omeg': load_image('sten.png'),
                'mar': load_image('mar.png')}
 player_image = load_image('mar.png')
 
@@ -66,27 +66,26 @@ class Player(pygame.sprite.Sprite):
 
 class Camera:
     # зададим начальный сдвиг камеры и размер поля для возможности реализации циклического сдвига
-    def __init__(self, field_size):
-        self.dx = 0
-        self.dy = 0
-        self.field_size = field_size
+    def __init__(self, x, y):
+        self.dx = x
+        self.dy = y
 
     # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
         obj.rect.x += self.dx
         # вычислим координату клетки, если она уехала влево за границу экрана
-        if obj.rect.x < -obj.rect.width:
-            obj.rect.x += (self.field_size[0] + 1) * obj.rect.width
+        # if obj.rect.x < -obj.rect.width:
+        #     obj.rect.x += (self.field_size[0] + 1) * obj.rect.width
         # вычислим координату клетки, если она уехала вправо за границу экрана
-        if obj.rect.x >= (self.field_size[0]) * obj.rect.width:
-            obj.rect.x += -obj.rect.width * (1 + self.field_size[0])
+        # if obj.rect.x >= (self.field_size[0]) * obj.rect.width:
+        #     obj.rect.x += -obj.rect.width * (1 + self.field_size[0])
         obj.rect.y += self.dy
         # вычислим координату клетки, если она уехала вверх за границу экрана
-        if obj.rect.y < -obj.rect.height:
-            obj.rect.y += (self.field_size[1] + 1) * obj.rect.height
+        # if obj.rect.y < -obj.rect.height:
+        #     obj.rect.y += (self.field_size[1] + 1) * obj.rect.height
         # вычислим координату клетки, если она уехала вниз за границу экрана
-        if obj.rect.y >= (self.field_size[1]) * obj.rect.height:
-            obj.rect.y += -obj.rect.height * (1 + self.field_size[1])
+        # if obj.rect.y >= (self.field_size[1]) * obj.rect.height:
+        #     obj.rect.y += -obj.rect.height * (1 + self.field_size[1])
 
     # позиционировать камеру на объекте target
     def update(self, target):
@@ -138,13 +137,11 @@ class Board:
 
     def enterprited(self, n, x, y):
         if n == 128:
-            return Tile('empty', x, y)
+            return Tile('fon', x, y)
         elif n == 170:
             return Tile('wall', x, y)
-        elif n == 212:
-            return Tile('omeg', x, y)
         else:
-            return Tile('mar', x, y)
+            return Tile('omeg', x, y)
 
     # настройка внешнего вида
     def set_view(self, left, top, cell_size):
@@ -190,13 +187,14 @@ class Board:
         self.board[y][x] = 10
 
 
-camera = Camera((random.randint(0, SIZE_MAP[0]), random.randint(0, SIZE_MAP[1])))
+camera = Camera(random.randint(0, SIZE_MAP[0]), random.randint(0, SIZE_MAP[1]))
 player = Player(camera.dx, camera.dy)
 
 if __name__ == '__main__':
     board = Board(SIZE_MAP[0], SIZE_MAP[1])
     cord = random.randint(0, SIZE_MAP[0]), random.randint(0, SIZE_MAP[1])
     clock = pygame.time.Clock()
+
 
     running = True
     while running:
