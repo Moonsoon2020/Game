@@ -16,8 +16,8 @@ STEP = 10
 SIZE_WINDOW = WIDTH, HEIGHT
 SIZE_MAP = 500, 500
 TILE_WIDTH = 20
-RES_MAP = 20
-RES_RUD = 5
+RES_MAP = 5
+RES_RUD = 2
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
