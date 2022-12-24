@@ -1,15 +1,19 @@
+import random
+
 import pygame
 import os
-import random
 from PerlinNoise import *
 import PIL.Image
+from ContolBD import ControlDataBase
 
 FPS = 50
 WIDTH = 800
 HEIGHT = 600
 STEP = 10
+KOF_START = 0.25
+KOF_ENEMY = 0.05
 SIZE_WINDOW = WIDTH, HEIGHT
-SIZE_MAP = 100, 100
+SIZE_MAP = 300, 300
 TILE_WIDTH = 20
 RES_MAP = 5
 RES_RUD = 2
@@ -44,7 +48,28 @@ def load_image(name, color_key=None):
     return image
 
 
-tile_images = {'wall': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'omeg': load_image('sten.png'),
+def perep(name, x, y):
+    if name == 'f':
+        return Block('fon', x, y, 'f')
+    elif name == 'r':
+        return Block('rud', x, y, 'r', dop_group=rud_group)
+    else:
+        return Block('sten', x, y, 's', dop_group=wall_group)
+
+
+def load_level(filename):
+    ControlDataBase().del_world(filename)
+    filename = "map/" + filename + '.txt'
+    # читаем уровень, убирая символы перевода строки
+    with open(filename, 'r') as mapFile:
+        level_map = [line.split() for line in mapFile]
+
+    board = [[perep(level_map[i][j], i, j) for j in range(len(level_map[i]))]for i in range(len(level_map))]
+    os.remove(filename)
+    return board
+
+
+tile_images = {'rud': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'sten': load_image('sten.png'),
                'mar': load_image('mar.png')}
 
 
@@ -54,10 +79,14 @@ class Entity(pygame.sprite.Sprite):
 
 
 class Block(Entity):
-    def __init__(self, block_type, pos_x, pos_y, dop_group=block_group):
+    def __init__(self, block_type, pos_x, pos_y, station, dop_group=block_group):
         super(Block, self).__init__(all_sprites, block_group, dop_group)
         self.image = tile_images[block_type]
+        self.station = station
         self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
+
+    def __str__(self):
+        return self.station
 
 
 class MoveableEntity(Entity):
@@ -107,9 +136,10 @@ class Player(MoveableEntity):
 
 class GeneratePlay:
     # создание поля
-    def __init__(self, width, height):
+    def __init__(self, width, height, seed):
         self.width = width
         self.height = height
+        random.seed(seed)
         self.noise_map = PerlinNoiseFactory(2, octaves=1, tile=(width // RES_MAP + 1, height // RES_MAP + 1))
         self.noise_rud = PerlinNoiseFactory(2, octaves=1, tile=(width // RES_RUD + 1, height // RES_RUD + 1))
         self.board = [[[self.noise_map(i / RES_MAP, j / RES_MAP),
@@ -143,16 +173,99 @@ class GeneratePlay:
     # 128 серый
     def getcolor(self, color, ind):
         if ind == 0:
-            return 1 if color > 0.3 else 0
+            return 1 if color > 0.25 else 0
         else:
             return 1 if color > 0.6 else 0
 
     def enterprited(self, n, x, y):
         if n == 128:
-            return Block('fon', x, y)
+            return Block('fon', x, y, 'f')
         elif n == 170:
-            return Block('wall', x, y, dop_group=rud_group)
+            return Block('rud', x, y, 'r', dop_group=rud_group)
         else:
-            return Block('omeg', x, y, dop_group=wall_group)
+            return Block('sten', x, y,  's', dop_group=wall_group)
 
-    # настройка внешнего вида
+    def start_cord(self):
+        cord = random.randint(int(KOF_START * SIZE_MAP[0]), int(SIZE_MAP[0] * (1 - KOF_START))), \
+               random.randint(int(KOF_START * SIZE_MAP[1]), int(SIZE_MAP[1] * (1 - KOF_START)))
+        while self.board[cord[0]][cord[1]] in wall_group or self.board[cord[0]][cord[1]] in rud_group:
+            cord = random.randint(int(KOF_START * SIZE_MAP[0]), int(SIZE_MAP[0] * (1 - KOF_START))), \
+                   random.randint(int(KOF_START * SIZE_MAP[1]), int(SIZE_MAP[1] * (1 - KOF_START)))
+        return cord
+
+
+class Camera:
+    # зададим начальный сдвиг камеры и размер поля для возможности реализации циклического сдвига
+    def __init__(self, x, y):
+        self.dx = x
+        self.dy = y
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
+
+
+class Game:
+    def __init__(self, flag, name):
+        self.name = name
+        self.controlDB = ControlDataBase()
+        if flag:
+            self.key = random.randint(0, 10000000)
+            self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
+            self.player = Player(*self.board.start_cord())
+            self.board_pole = self.board.board
+            self.x, self.y = self.player.x, self.player.y
+        else:
+            self.id, self.key, self.x, self.y = self.controlDB.get_info_of_name_world(name)
+            self.board = load_level(str(self.id))
+            self.player = Player(self.x, self.y)
+            self.board_pole = self.board
+        self.camera = Camera(self.player.x, self.player.y)
+        self.play()
+
+    def play(self):
+        clock = pygame.time.Clock()
+        running = True
+        while running:
+            v = True
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.close()
+                    running = False
+                elif event.type == pygame.KEYDOWN and v:
+                    if event.key == pygame.K_LEFT:
+                        v = False
+                        self.player.remove_cord(-STEP, 'ox')
+                    if event.key == pygame.K_RIGHT:
+                        v = False
+                        self.player.remove_cord(STEP, 'ox')
+                    if event.key == pygame.K_UP:
+                        v = False
+                        self.player.remove_cord(-STEP, 'oy')
+                    if event.key == pygame.K_DOWN:
+                        v = False
+                        self.player.remove_cord(STEP, 'oy')
+
+            self.camera.update(self.player)
+            for sprite in all_sprites:
+                self.camera.apply(sprite)
+            screen.fill(pygame.Color(0, 0, 0))
+            all_sprites.draw(screen)
+            player_group.draw(screen)
+            pygame.display.flip()
+            clock.tick(FPS)
+
+    def close(self):
+        ID = self.controlDB.add_world(self.name, '100', self.key, self.x, self.y)
+        f = open(f"map/{ID}.txt", 'w')
+        for i in range(len(self.board_pole)):
+            for j in range(len(self.board_pole[i])):
+                print(self.board_pole[i][j], file=f, end='\t')
+            print(file=f)
+        f.close()

@@ -94,10 +94,10 @@ def start_screen():
         screen.blit(string_rendered, intro_rect)
 
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+            elif evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)
