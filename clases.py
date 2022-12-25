@@ -1,22 +1,22 @@
-import random
-
 import pygame
 import os
 from PerlinNoise import *
 import PIL.Image
 from ContolBD import ControlDataBase
+import time
+import sys
 
 FPS = 50
-WIDTH = 800
-HEIGHT = 600
+WIDTH_MAP = HEIGHT = 700
+WIDTH = WIDTH_MAP + 300
 STEP = 10
 KOF_START = 0.25
 KOF_ENEMY = 0.05
-SIZE_WINDOW = WIDTH, HEIGHT
-SIZE_MAP = 300, 300
+SIZE_WINDOW = WIDTH_MAP, HEIGHT
 TILE_WIDTH = 20
 RES_MAP = 5
 RES_RUD = 2
+SIZE_MAP = None, None
 
 all_sprites = pygame.sprite.Group()
 block_group = pygame.sprite.Group()
@@ -27,6 +27,8 @@ moveable_entity_group = pygame.sprite.Group()
 
 pygame.init()
 pygame.key.set_repeat(200, 70)
+screen_info = pygame.Surface((WIDTH - WIDTH_MAP, HEIGHT))
+screen_map = pygame.Surface((WIDTH_MAP, HEIGHT))
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
@@ -53,8 +55,10 @@ def perep(name, x, y):
         return Block('fon', x, y, 'f')
     elif name == 'r':
         return Block('rud', x, y, 'r', dop_group=rud_group)
-    else:
+    elif name == 's':
         return Block('sten', x, y, 's', dop_group=wall_group)
+    elif name == 'y':
+        return Core('yad', x, y, 'y')
 
 
 def load_level(filename):
@@ -64,13 +68,14 @@ def load_level(filename):
     with open(filename, 'r') as mapFile:
         level_map = [line.split() for line in mapFile]
 
-    board = [[perep(level_map[i][j], i, j) for j in range(len(level_map[i]))]for i in range(len(level_map))]
+    board = [[perep(level_map[i][j], j, i) for j in range(len(level_map[i]))] for i in range(len(level_map))]
     os.remove(filename)
     return board
 
 
 tile_images = {'rud': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'sten': load_image('sten.png'),
-               'mar': load_image('mar.png')}
+               'mar': load_image('mar.png'), 'yad': load_image('yadro.png'), 'bur': load_image('bur.jpg'),
+               'alm': load_image('almaz.png')}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -84,9 +89,15 @@ class Block(Entity):
         self.image = tile_images[block_type]
         self.station = station
         self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
+        self.mask = pygame.mask.from_surface(self.image)
 
     def __str__(self):
         return self.station
+
+
+class Core(Block):
+    def __init__(self, block_type, pos_x, pos_y, station, dop_group=block_group):
+        super().__init__(block_type, pos_x, pos_y, station, dop_group)
 
 
 class MoveableEntity(Entity):
@@ -113,6 +124,11 @@ class MoveableEntity(Entity):
         return True
 
 
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
 class Player(MoveableEntity):
     def __init__(self, pos_x, pos_y):
         super(Player, self).__init__(player_group, pos_x, pos_y)
@@ -129,7 +145,7 @@ class Player(MoveableEntity):
                 self.cords[0] += st
                 self.rect.x += step
         else:
-            if 0 <= self.cords[1] + st <= SIZE_MAP[1] - 2 and self.remove_cord_oy(step):
+            if 0 <= self.cords[1] + st <= SIZE_MAP[1] - 1 and self.remove_cord_oy(step):
                 self.cords[1] += st
                 self.rect.y += step
 
@@ -147,15 +163,11 @@ class GeneratePlay:
                        for i in range(width)] for j in range(height)]
         board_new = []
         # значения по умолчанию
-        self.left = 0
-        self.top = 0
-        self.cell_size = 10
-        self.start = (0, 0)
         img = PIL.Image.new('RGB', (width, height))
         pix = img.load()
-        for x in range(width):
+        for y in range(height):
             a = []
-            for y in range(height):
+            for x in range(width):
                 pix[x, y] = int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
                             int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
                             int((self.getcolor(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)
@@ -183,15 +195,18 @@ class GeneratePlay:
         elif n == 170:
             return Block('rud', x, y, 'r', dop_group=rud_group)
         else:
-            return Block('sten', x, y,  's', dop_group=wall_group)
+            return Block('sten', x, y, 's', dop_group=wall_group)
 
     def start_cord(self):
         cord = random.randint(int(KOF_START * SIZE_MAP[0]), int(SIZE_MAP[0] * (1 - KOF_START))), \
                random.randint(int(KOF_START * SIZE_MAP[1]), int(SIZE_MAP[1] * (1 - KOF_START)))
-        while self.board[cord[0]][cord[1]] in wall_group or self.board[cord[0]][cord[1]] in rud_group:
+        while self.board[cord[1]][cord[0]] in wall_group or self.board[cord[1]][cord[0]] in rud_group:
             cord = random.randint(int(KOF_START * SIZE_MAP[0]), int(SIZE_MAP[0] * (1 - KOF_START))), \
                    random.randint(int(KOF_START * SIZE_MAP[1]), int(SIZE_MAP[1] * (1 - KOF_START)))
         return cord
+
+    def remove(self, tile, x, y):
+        self.board[y][x] = tile
 
 
 class Camera:
@@ -207,31 +222,48 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
+        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH_MAP // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
 
 
 class Game:
     def __init__(self, flag, name):
+        global SIZE_MAP
         self.name = name
         self.controlDB = ControlDataBase()
         if flag:
+            SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
             self.key = random.randint(0, 10000000)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
-            self.board_pole = self.board.board
             self.x, self.y = self.player.x, self.player.y
+            self.board.remove(Core('yad', self.x, self.y, 'y'), self.x, self.y)
+            self.board_pole = self.board.board
+            self.time = 0
         else:
-            self.id, self.key, self.x, self.y = self.controlDB.get_info_of_name_world(name)
+            self.id, self.key, self.x, self.y, self.time = self.controlDB.get_info_of_name_world(name)
             self.board = load_level(str(self.id))
             self.player = Player(self.x, self.y)
             self.board_pole = self.board
+            SIZE_MAP = len(self.board_pole), len(self.board_pole[0])
         self.camera = Camera(self.player.x, self.player.y)
+        self.timer = time.time()
+        self.res_almaz = 0
         self.play()
 
     def play(self):
         clock = pygame.time.Clock()
         running = True
+        font = pygame.font.Font(None, 30)
+        string_text1 = font.render('Ресурсы Комплекса', True, pygame.Color('black'))
+        intro_rect1 = string_text1.get_rect()
+        intro_rect1.x = 60
+        intro_rect1.y = 10
+        string_text2 = font.render('Постройки Комплекса', True, pygame.Color('black'))
+        intro_rect2 = string_text2.get_rect()
+        intro_rect2.x = 50
+        intro_rect2.y = 290
+        rud_image = tile_images['alm']
         while running:
             v = True
             for event in pygame.event.get():
@@ -255,15 +287,29 @@ class Game:
             self.camera.update(self.player)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
-            screen.fill(pygame.Color(0, 0, 0))
-            all_sprites.draw(screen)
-            player_group.draw(screen)
+            screen_map.fill(pygame.Color(0, 0, 0))
+            screen_info.fill(pygame.Color('white'))
+            all_sprites.draw(screen_map)
+            player_group.draw(screen_map)
+            pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
+            pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
+            string_text3 = font.render('-  ' + str(self.res_almaz), True, pygame.Color('black'))
+            intro_rect3 = string_text1.get_rect()
+            intro_rect3.x = 60
+            intro_rect3.y = 50
+            screen_info.blit(string_text1, intro_rect1)
+            screen_info.blit(string_text2, intro_rect2)
+            screen_info.blit(string_text3, intro_rect3)
+            screen_info.blit(rud_image, (10, 40))
+            screen.blit(screen_map, (0, 0))
+            screen.blit(screen_info, (WIDTH_MAP, 0))
             pygame.display.flip()
             clock.tick(FPS)
 
     def close(self):
-        ID = self.controlDB.add_world(self.name, '100', self.key, self.x, self.y)
-        f = open(f"map/{ID}.txt", 'w')
+        f = open(f"""map/{self.controlDB.add_world(self.name, self.time + 
+                                                   int(time.time()) - int(self.timer),
+                                                   self.key, self.x, self.y)}.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
                 print(self.board_pole[i][j], file=f, end='\t')

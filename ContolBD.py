@@ -49,7 +49,7 @@ class ControlDataBase:
         self.con.commit()
 
     def get_info_of_name_world(self, name):
-        return self.con.cursor().execute(f"""SELECT ID, generation_key, x, y FROM OpenWorlds WHERE name='{name}'""").fetchone()
+        return self.con.cursor().execute(f"""SELECT ID, generation_key, x, y, time FROM OpenWorlds WHERE name='{name}'""").fetchone()
 
     def del_world(self, ID):
         self.con.cursor().execute(f'''DELETE from OpenWorlds WHERE ID = {ID}''')
