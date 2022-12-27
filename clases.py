@@ -60,11 +60,13 @@ def perep(name, x, y):
     elif name[0] == 's':
         return Block('sten', x, y, 's', dop_group=wall_group)
     elif name[0] == 'y':
-        return Core('yad', x, y, int(name[1:]))
+        return Core(x, y, int(name[1:]))
     elif name[0] == 'm':
-        return Mine('mine', x, y, int(name[1:]), dop_group=mine_group)
+        return Mine(x, y, int(name[1:]), dop_group=mine_group)
     elif name[0] == 't':
-        return Turel('tur', x, y, int(name[1:]), dop_group=turel_group)
+        return Turel(x, y, int(name[1:]), dop_group=turel_group)
+    elif name[0] == 'w':
+        return Wall(x, y, int(name[1:]))
 
 
 def load_level(filename):
@@ -80,9 +82,10 @@ def load_level(filename):
 
 
 tile_images = {'rud': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'sten': load_image('sten.png'),
-               'mar': load_image('mar.png'), 'yad': load_image('yadro.png'), 'bur': load_image('bur.jpg'),
+               'mar': load_image('mar.png'), 'yad': load_image('yadro.png'), 'ur': load_image('bur.jpg'),
                'alm': load_image('almaz.png'), 'mine': load_image('bur.jpg'), 'bur_m': load_image('bur_magaz.jpg'),
-               'tur': load_image('turel.jpg'), 'turel_m': load_image('turel_m.jpg')}
+               'tur': load_image('turel.jpg'), 'turel_m': load_image('turel_m.jpg'), 'wal': load_image('wal.png'),
+               'wal2': pygame.transform.scale(load_image('wal.png'), (20, 20))}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -107,20 +110,26 @@ class Block(Entity):
 
 
 class Core(Block):
-    def __init__(self, block_type, pos_x, pos_y, xp, dop_group=block_group):
-        super().__init__(block_type, pos_x, pos_y, 'y', dop_group)
+    def __init__(self, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__('yad', pos_x, pos_y, 'y', dop_group)
         self.xp = xp
 
 
 class Turel(Block):
-    def __init__(self, block_type, pos_x, pos_y, xp, dop_group=block_group):
-        super().__init__(block_type, pos_x, pos_y, 't', dop_group)
+    def __init__(self, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__('tur', pos_x, pos_y, 't', dop_group)
         self.xp = xp
 
 
 class Mine(Block):
-    def __init__(self, block_type, pos_x, pos_y, xp, dop_group=block_group):
-        super().__init__(block_type, pos_x, pos_y, 'm', dop_group)
+    def __init__(self, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__('mine', pos_x, pos_y, 'm', dop_group)
+        self.xp = xp
+
+
+class Wall(Block):
+    def __init__(self, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__('wal2', pos_x, pos_y, 'w', dop_group)
         self.xp = xp
 
 
@@ -267,7 +276,7 @@ class Game:
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
-            self.board.remove(Core('yad', self.x, self.y, 100), self.x, self.y)
+            self.board.remove(Core(self.x, self.y, 100), self.x, self.y)
             self.board_pole = self.board.board
             self.rud = 200
             self.time = 0
@@ -298,6 +307,7 @@ class Game:
         self.rud_image = tile_images['alm']
         self.bur_magaz_image = pygame.transform.scale(tile_images['bur_m'], (40, 40))
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
+        self.wall_magaz_image = tile_images['wal']
         self.play()
 
     def play(self):
@@ -349,18 +359,24 @@ class Game:
                 self.position = 'bur'
             elif 60 <= pos[0] <= 100 and 330 <= pos[1] <= 370:
                 self.position = 'tur'
+            elif 110 <= pos[0] <= 150 and 330 <= pos[1] <= 370:
+                self.position = 'wal'
         else:
             pos = pos[0] // TILE_WIDTH + self.player.cords[0] - 17, pos[1] // TILE_WIDTH + self.player.cords[1] - 17
             print(pos, self.board_pole[pos[1]][pos[0]].station)
             if self.board_pole[pos[1]][pos[0]].station == 'r' and self.rud >= 50 and self.position == 'bur':
                 self.rud -= 50
-                self.board_pole[pos[1]][pos[0]] = Mine('mine', pos[0] + 17 - self.player.cords[0],
+                self.board_pole[pos[1]][pos[0]] = Mine(pos[0] + 17 - self.player.cords[0],
                                                        pos[1] + 17 - self.player.cords[1], 100)
                 self.col_bur += 1
             elif self.rud >= 50 and self.position == 'tur' and self.board_pole[pos[1]][pos[0]].station != 's':
                 self.rud -= 50
-                self.board_pole[pos[1]][pos[0]] = Turel('tur', pos[0] + 17 - self.player.cords[0],
+                self.board_pole[pos[1]][pos[0]] = Turel(pos[0] + 17 - self.player.cords[0],
                                                         pos[1] + 17 - self.player.cords[1], 100)
+            elif self.rud >= 50 and self.position == 'wal' and self.board_pole[pos[1]][pos[0]].station != 's':
+                self.rud -= 50
+                self.board_pole[pos[1]][pos[0]] = Wall(pos[0] + 17 - self.player.cords[0],
+                                                       pos[1] + 17 - self.player.cords[1], 100)
 
     def update_screen_info(self):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
@@ -376,6 +392,13 @@ class Game:
         screen_info.blit(self.rud_image, (10, 40))
         screen_info.blit(self.bur_magaz_image, (10, 330))
         screen_info.blit(self.turel_magaz_image, (60, 330))
+        screen_info.blit(self.wall_magaz_image, (110, 330))
+        if self.position == 'bur':
+            pygame.draw.rect(screen_info, (0, 0, 0), (8, 330, 42, 42), 2)
+        elif self.position == 'tur':
+            pygame.draw.rect(screen_info, (0, 0, 0), (58, 330, 42, 42), 2)
+        elif self.position == 'wal':
+            pygame.draw.rect(screen_info, (0, 0, 0), (108, 330, 42, 42), 2)
 
     def close(self):
         f = open(f"""map/{self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
