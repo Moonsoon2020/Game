@@ -24,9 +24,9 @@ class ControlDataBase:
         self.con.execute(tabl2)
         self.con.commit()
 
-    def add_world(self, name, time, generation_key, x, y):
-        self.con.cursor().execute(f'''INSERT INTO OpenWorlds (name, time, generation_key, x, y) 
-        VALUES ('{name}', '{time}', {generation_key}, {x}, {y})''')
+    def add_world(self, name, time, generation_key, x, y, rud):
+        self.con.cursor().execute(f'''INSERT INTO OpenWorlds (name, time, generation_key, x, y, rud) 
+        VALUES ('{name}', '{time}', {generation_key}, {x}, {y}, {rud})''')
         self.con.commit()
         return self.get_worlds()[-1][0]
 
@@ -49,7 +49,8 @@ class ControlDataBase:
         self.con.commit()
 
     def get_info_of_name_world(self, name):
-        return self.con.cursor().execute(f"""SELECT ID, generation_key, x, y, time FROM OpenWorlds WHERE name='{name}'""").fetchone()
+        return self.con.cursor().execute(f"""SELECT ID, generation_key, x, y, time, rud
+         FROM OpenWorlds WHERE name='{name}'""").fetchone()
 
     def del_world(self, ID):
         self.con.cursor().execute(f'''DELETE from OpenWorlds WHERE ID = {ID}''')

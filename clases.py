@@ -10,7 +10,7 @@ FPS = 50
 WIDTH_MAP = HEIGHT = 700
 WIDTH = WIDTH_MAP + 300
 STEP = 10
-KOF_START = 0.25
+KOF_START = 0.45
 KOF_ENEMY = 0.05
 SIZE_WINDOW = WIDTH_MAP, HEIGHT
 TILE_WIDTH = 20
@@ -23,6 +23,7 @@ block_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 rud_group = pygame.sprite.Group()
+mine_group = pygame.sprite.Group()
 moveable_entity_group = pygame.sprite.Group()
 
 pygame.init()
@@ -51,14 +52,16 @@ def load_image(name, color_key=None):
 
 
 def perep(name, x, y):
-    if name == 'f':
+    if name[0] == 'f':
         return Block('fon', x, y, 'f')
-    elif name == 'r':
+    elif name[0] == 'r':
         return Block('rud', x, y, 'r', dop_group=rud_group)
-    elif name == 's':
+    elif name[0] == 's':
         return Block('sten', x, y, 's', dop_group=wall_group)
-    elif name == 'y':
-        return Core('yad', x, y, 'y')
+    elif name[0] == 'y':
+        return Core('yad', x, y, 'y', int(name[1:]))
+    elif name[0] == 'm':
+        return Mine('mine', x, y, 'm', int(name[1:]), dop_group=mine_group)
 
 
 def load_level(filename):
@@ -75,7 +78,7 @@ def load_level(filename):
 
 tile_images = {'rud': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'sten': load_image('sten.png'),
                'mar': load_image('mar.png'), 'yad': load_image('yadro.png'), 'bur': load_image('bur.jpg'),
-               'alm': load_image('almaz.png')}
+               'alm': load_image('almaz.png'), 'mine': load_image('bur.jpg'), 'bur_m': load_image('bur_magaz.jpg')}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -90,14 +93,25 @@ class Block(Entity):
         self.station = station
         self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
         self.mask = pygame.mask.from_surface(self.image)
+        self.xp = None
 
     def __str__(self):
-        return self.station
+        if self.xp is None:
+            return self.station
+        else:
+            return self.station + str(self.xp)
 
 
 class Core(Block):
-    def __init__(self, block_type, pos_x, pos_y, station, dop_group=block_group):
+    def __init__(self, block_type, pos_x, pos_y, station, xp, dop_group=block_group):
         super().__init__(block_type, pos_x, pos_y, station, dop_group)
+        self.xp = xp
+
+
+class Mine(Block):
+    def __init__(self, block_type, pos_x, pos_y, station, xp, dop_group=block_group):
+        super().__init__(block_type, pos_x, pos_y, station, dop_group)
+        self.xp = xp
 
 
 class MoveableEntity(Entity):
@@ -137,17 +151,22 @@ class Player(MoveableEntity):
         self.x = pos_x
         self.y = pos_y
         self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
+        self.rect_d = self.rect
+        self.x_p = pos_x
+        self.y_p = pos_y
 
     def remove_cord(self, step, paral):
         st = 1 if step > 0 else -1
         if paral == 'ox':  # колво пикселей в человечке подредачь потом
-            if 0 <= self.cords[0] + st <= SIZE_MAP[0] - 1 and self.remove_cord_ox(step):
+            if 17 <= self.cords[0] + st <= SIZE_MAP[0] - 18 and self.remove_cord_ox(step):
                 self.cords[0] += st
                 self.rect.x += step
+                self.x_p += step
         else:
-            if 0 <= self.cords[1] + st <= SIZE_MAP[1] - 1 and self.remove_cord_oy(step):
+            if 17 <= self.cords[1] + st <= SIZE_MAP[1] - 18 and self.remove_cord_oy(step):
                 self.cords[1] += st
                 self.rect.y += step
+                self.y_p += step
 
 
 class GeneratePlay:
@@ -231,24 +250,32 @@ class Game:
         global SIZE_MAP
         self.name = name
         self.controlDB = ControlDataBase()
+        self.col_bur = 0
         if flag:
             SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
             self.key = random.randint(0, 10000000)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
-            self.board.remove(Core('yad', self.x, self.y, 'y'), self.x, self.y)
+            self.board.remove(Core('yad', self.x, self.y, 'y', 100), self.x, self.y)
             self.board_pole = self.board.board
+            self.rud = 200
             self.time = 0
+
         else:
-            self.id, self.key, self.x, self.y, self.time = self.controlDB.get_info_of_name_world(name)
+            self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
             self.board = load_level(str(self.id))
             self.player = Player(self.x, self.y)
             self.board_pole = self.board
             SIZE_MAP = len(self.board_pole), len(self.board_pole[0])
+            for i in self.board_pole:
+                for j in i:
+                    if j.station == 'm':
+                        self.col_bur += 1
         self.camera = Camera(self.player.x, self.player.y)
         self.timer = time.time()
-        self.res_almaz = 0
+        self.position = ''
+        print(SIZE_MAP)
         self.play()
 
     def play(self):
@@ -264,36 +291,45 @@ class Game:
         intro_rect2.x = 50
         intro_rect2.y = 290
         rud_image = tile_images['alm']
+        bur_magaz_image = tile_images['bur_m']
+        bur_magaz_image = pygame.transform.scale(bur_magaz_image, (40, 40))
+        obn = 0
         while running:
             v = True
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
                     running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.click(event.pos)
                 elif event.type == pygame.KEYDOWN and v:
-                    if event.key == pygame.K_LEFT:
+                    if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         v = False
                         self.player.remove_cord(-STEP, 'ox')
-                    if event.key == pygame.K_RIGHT:
+                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         v = False
                         self.player.remove_cord(STEP, 'ox')
-                    if event.key == pygame.K_UP:
+                    if event.key == pygame.K_UP or event.key == pygame.K_w:
                         v = False
                         self.player.remove_cord(-STEP, 'oy')
-                    if event.key == pygame.K_DOWN:
+                    if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                         v = False
                         self.player.remove_cord(STEP, 'oy')
-
             self.camera.update(self.player)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
             screen_map.fill(pygame.Color(0, 0, 0))
             screen_info.fill(pygame.Color('white'))
+            obn += 1
+            if obn == 20:
+                obn = 0
+                self.rud += self.col_bur
             all_sprites.draw(screen_map)
             player_group.draw(screen_map)
             pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
             pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
-            string_text3 = font.render('-  ' + str(self.res_almaz), True, pygame.Color('black'))
+            string_text3 = font.render('-  ' + str(self.rud) +
+                                       f' {self.player.cords[0]}, {self.player.cords[1]}', True, pygame.Color('black'))
             intro_rect3 = string_text1.get_rect()
             intro_rect3.x = 60
             intro_rect3.y = 50
@@ -301,15 +337,30 @@ class Game:
             screen_info.blit(string_text2, intro_rect2)
             screen_info.blit(string_text3, intro_rect3)
             screen_info.blit(rud_image, (10, 40))
+            screen_info.blit(bur_magaz_image, (10, 330))
             screen.blit(screen_map, (0, 0))
             screen.blit(screen_info, (WIDTH_MAP, 0))
             pygame.display.flip()
             clock.tick(FPS)
 
+    def click(self, pos):
+        if pos[0] > WIDTH_MAP:
+            pos = pos[0] - WIDTH_MAP, pos[1]
+            if 10 <= pos[0] <= 10 + 40 and 330 <= pos[1] <= 330 + 40:
+                self.position = 'bur'
+        else:
+            pos = pos[0] // TILE_WIDTH + self.player.cords[0] - 17, pos[1] // TILE_WIDTH + self.player.cords[1] - 17
+            print(pos, self.board_pole[pos[1]][pos[0]].station)
+            if self.board_pole[pos[1]][pos[0]].station == 'r' and self.rud >= 20 and self.position == 'bur':
+                self.rud -= 50
+                self.board_pole[pos[1]][pos[0]] = Mine('mine', pos[0] + 17 - self.player.cords[0],
+                                                       pos[1] + 17 - self.player.cords[1], 'm', 100)
+                self.col_bur += 1
+
     def close(self):
-        f = open(f"""map/{self.controlDB.add_world(self.name, self.time + 
+        f = open(f"""map/{self.controlDB.add_world(self.name, self.time +
                                                    int(time.time()) - int(self.timer),
-                                                   self.key, self.x, self.y)}.txt""", 'w')
+                                                   self.key, self.x, self.y, self.rud)}.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
                 print(self.board_pole[i][j], file=f, end='\t')
