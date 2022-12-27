@@ -16,7 +16,7 @@ SIZE_WINDOW = WIDTH_MAP, HEIGHT
 TILE_WIDTH = 20
 RES_MAP = 5
 RES_RUD = 2
-SIZE_MAP = None, None
+SIZE_MAP = -1, -1
 
 all_sprites = pygame.sprite.Group()
 block_group = pygame.sprite.Group()
@@ -24,6 +24,7 @@ player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 rud_group = pygame.sprite.Group()
 mine_group = pygame.sprite.Group()
+turel_group = pygame.sprite.Group()
 moveable_entity_group = pygame.sprite.Group()
 
 pygame.init()
@@ -59,9 +60,11 @@ def perep(name, x, y):
     elif name[0] == 's':
         return Block('sten', x, y, 's', dop_group=wall_group)
     elif name[0] == 'y':
-        return Core('yad', x, y, 'y', int(name[1:]))
+        return Core('yad', x, y, int(name[1:]))
     elif name[0] == 'm':
-        return Mine('mine', x, y, 'm', int(name[1:]), dop_group=mine_group)
+        return Mine('mine', x, y, int(name[1:]), dop_group=mine_group)
+    elif name[0] == 't':
+        return Turel('tur', x, y, int(name[1:]), dop_group=turel_group)
 
 
 def load_level(filename):
@@ -78,7 +81,8 @@ def load_level(filename):
 
 tile_images = {'rud': load_image('rud20.png'), 'fon': load_image('fon/fon20.png'), 'sten': load_image('sten.png'),
                'mar': load_image('mar.png'), 'yad': load_image('yadro.png'), 'bur': load_image('bur.jpg'),
-               'alm': load_image('almaz.png'), 'mine': load_image('bur.jpg'), 'bur_m': load_image('bur_magaz.jpg')}
+               'alm': load_image('almaz.png'), 'mine': load_image('bur.jpg'), 'bur_m': load_image('bur_magaz.jpg'),
+               'tur': load_image('turel.jpg'), 'turel_m': load_image('turel_m.jpg')}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -103,14 +107,20 @@ class Block(Entity):
 
 
 class Core(Block):
-    def __init__(self, block_type, pos_x, pos_y, station, xp, dop_group=block_group):
-        super().__init__(block_type, pos_x, pos_y, station, dop_group)
+    def __init__(self, block_type, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__(block_type, pos_x, pos_y, 'y', dop_group)
+        self.xp = xp
+
+
+class Turel(Block):
+    def __init__(self, block_type, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__(block_type, pos_x, pos_y, 't', dop_group)
         self.xp = xp
 
 
 class Mine(Block):
-    def __init__(self, block_type, pos_x, pos_y, station, xp, dop_group=block_group):
-        super().__init__(block_type, pos_x, pos_y, station, dop_group)
+    def __init__(self, block_type, pos_x, pos_y, xp, dop_group=block_group):
+        super().__init__(block_type, pos_x, pos_y, 'm', dop_group)
         self.xp = xp
 
 
@@ -187,12 +197,12 @@ class GeneratePlay:
         for y in range(height):
             a = []
             for x in range(width):
-                pix[x, y] = int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
-                            int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
-                            int((self.getcolor(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)
-                a.append(self.enterprited((int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5) +
-                                           int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5) +
-                                           int((self.getcolor(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)) // 3, x,
+                pix[x, y] = int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
+                            int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
+                            int((self.get_color(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)
+                a.append(self.enterprited((int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5) +
+                                           int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5) +
+                                           int((self.get_color(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)) // 3, x,
                                           y))
             board_new.append(a)
         img.save("pr3.png")
@@ -202,7 +212,7 @@ class GeneratePlay:
     # 212 стены
     # 255 белый
     # 128 серый
-    def getcolor(self, color, ind):
+    def get_color(self, color, ind):
         if ind == 0:
             return 1 if color > 0.25 else 0
         else:
@@ -257,7 +267,7 @@ class Game:
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
-            self.board.remove(Core('yad', self.x, self.y, 'y', 100), self.x, self.y)
+            self.board.remove(Core('yad', self.x, self.y, 100), self.x, self.y)
             self.board_pole = self.board.board
             self.rud = 200
             self.time = 0
@@ -276,23 +286,23 @@ class Game:
         self.timer = time.time()
         self.position = ''
         print(SIZE_MAP)
+        self.font = pygame.font.Font(None, 30)
+        self.string_text1 = self.font.render('Ресурсы Комплекса', True, pygame.Color('black'))
+        self.intro_rect1 = self.string_text1.get_rect()
+        self.intro_rect1.x = 60
+        self.intro_rect1.y = 10
+        self.string_text2 = self.font.render('Постройки Комплекса', True, pygame.Color('black'))
+        self.intro_rect2 = self.string_text2.get_rect()
+        self.intro_rect2.x = 50
+        self.intro_rect2.y = 290
+        self.rud_image = tile_images['alm']
+        self.bur_magaz_image = pygame.transform.scale(tile_images['bur_m'], (40, 40))
+        self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
         self.play()
 
     def play(self):
         clock = pygame.time.Clock()
         running = True
-        font = pygame.font.Font(None, 30)
-        string_text1 = font.render('Ресурсы Комплекса', True, pygame.Color('black'))
-        intro_rect1 = string_text1.get_rect()
-        intro_rect1.x = 60
-        intro_rect1.y = 10
-        string_text2 = font.render('Постройки Комплекса', True, pygame.Color('black'))
-        intro_rect2 = string_text2.get_rect()
-        intro_rect2.x = 50
-        intro_rect2.y = 290
-        rud_image = tile_images['alm']
-        bur_magaz_image = tile_images['bur_m']
-        bur_magaz_image = pygame.transform.scale(bur_magaz_image, (40, 40))
         obn = 0
         while running:
             v = True
@@ -326,18 +336,7 @@ class Game:
                 self.rud += self.col_bur
             all_sprites.draw(screen_map)
             player_group.draw(screen_map)
-            pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
-            pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
-            string_text3 = font.render('-  ' + str(self.rud) +
-                                       f' {self.player.cords[0]}, {self.player.cords[1]}', True, pygame.Color('black'))
-            intro_rect3 = string_text1.get_rect()
-            intro_rect3.x = 60
-            intro_rect3.y = 50
-            screen_info.blit(string_text1, intro_rect1)
-            screen_info.blit(string_text2, intro_rect2)
-            screen_info.blit(string_text3, intro_rect3)
-            screen_info.blit(rud_image, (10, 40))
-            screen_info.blit(bur_magaz_image, (10, 330))
+            self.update_screen_info()
             screen.blit(screen_map, (0, 0))
             screen.blit(screen_info, (WIDTH_MAP, 0))
             pygame.display.flip()
@@ -346,20 +345,40 @@ class Game:
     def click(self, pos):
         if pos[0] > WIDTH_MAP:
             pos = pos[0] - WIDTH_MAP, pos[1]
-            if 10 <= pos[0] <= 10 + 40 and 330 <= pos[1] <= 330 + 40:
+            if 10 <= pos[0] <= 50 and 330 <= pos[1] <= 370:
                 self.position = 'bur'
+            elif 60 <= pos[0] <= 100 and 330 <= pos[1] <= 370:
+                self.position = 'tur'
         else:
             pos = pos[0] // TILE_WIDTH + self.player.cords[0] - 17, pos[1] // TILE_WIDTH + self.player.cords[1] - 17
             print(pos, self.board_pole[pos[1]][pos[0]].station)
-            if self.board_pole[pos[1]][pos[0]].station == 'r' and self.rud >= 20 and self.position == 'bur':
+            if self.board_pole[pos[1]][pos[0]].station == 'r' and self.rud >= 50 and self.position == 'bur':
                 self.rud -= 50
                 self.board_pole[pos[1]][pos[0]] = Mine('mine', pos[0] + 17 - self.player.cords[0],
-                                                       pos[1] + 17 - self.player.cords[1], 'm', 100)
+                                                       pos[1] + 17 - self.player.cords[1], 100)
                 self.col_bur += 1
+            elif self.rud >= 50 and self.position == 'tur' and self.board_pole[pos[1]][pos[0]].station != 's':
+                self.rud -= 50
+                self.board_pole[pos[1]][pos[0]] = Turel('tur', pos[0] + 17 - self.player.cords[0],
+                                                        pos[1] + 17 - self.player.cords[1], 100)
+
+    def update_screen_info(self):
+        pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
+        pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
+        string_text3 = self.font.render('-  ' + str(self.rud) +
+                                        f' {self.player.cords[0]}, {self.player.cords[1]}', True, pygame.Color('black'))
+        intro_rect3 = self.string_text1.get_rect()
+        intro_rect3.x = 60
+        intro_rect3.y = 50
+        screen_info.blit(self.string_text1, self.intro_rect1)
+        screen_info.blit(self.string_text2, self.intro_rect2)
+        screen_info.blit(string_text3, intro_rect3)
+        screen_info.blit(self.rud_image, (10, 40))
+        screen_info.blit(self.bur_magaz_image, (10, 330))
+        screen_info.blit(self.turel_magaz_image, (60, 330))
 
     def close(self):
-        f = open(f"""map/{self.controlDB.add_world(self.name, self.time +
-                                                   int(time.time()) - int(self.timer),
+        f = open(f"""map/{self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
                                                    self.key, self.x, self.y, self.rud)}.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
