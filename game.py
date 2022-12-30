@@ -6,7 +6,7 @@ from ContolBD import ControlDataBase
 import sys
 import time
 
-FPS = 50
+FPS = 200
 WIDTH_MAP = HEIGHT = 700
 WIDTH = WIDTH_MAP + 300
 STEP = 10
@@ -26,6 +26,7 @@ rud_group = pygame.sprite.Group()
 mine_group = pygame.sprite.Group()
 turel_group = pygame.sprite.Group()
 v_group = pygame.sprite.Group()
+y_grouop = pygame.sprite.Group()
 
 pygame.init()
 pygame.key.set_repeat(200, 70)
@@ -97,7 +98,7 @@ def load_level(filename, x, y):
 tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDTH, TILE_WIDTH)),
                'fon': pygame.transform.scale(load_image('fon/fon20.png'), (TILE_WIDTH, TILE_WIDTH)),
                'sten': pygame.transform.scale(load_image('sten.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'mar': pygame.transform.scale(load_image('mar.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'mar': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
                'yad': pygame.transform.scale(load_image('yadro.png'), (TILE_WIDTH, TILE_WIDTH)),
                'ur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'alm': load_image('almaz.png'),
@@ -106,7 +107,8 @@ tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDT
                'tur': pygame.transform.scale(load_image('turel.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'turel_m': load_image('turel_m.jpg'),
                'wal': load_image('wal.png'),
-               'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH))}
+               'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH))}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -160,7 +162,7 @@ class Wall(Block):
 
 class MoveableEntity(Entity):
     def __init__(self, moveable_entity_group, pos_x, pos_y):
-        super(MoveableEntity, self).__init__(v_group, moveable_entity_group)
+        super(MoveableEntity, self).__init__(moveable_entity_group, v_group)
         self.cords = [pos_x, pos_y]
         self.mask = None
         self.rect = None
@@ -183,18 +185,45 @@ class MoveableEntity(Entity):
 
 
 class Bot(MoveableEntity):
-    def __init__(self, pos_x, pos_y, wx, wy, xp):
-        super().__init__(v_group, pos_x, pos_y)
-        self.image = tile_images['mar']
+    def __init__(self, *args):
+        self.image = tile_images['bot']
+
+        if len(args) == 7:
+            pos_x, pos_y, x_p, y_p, yx, yy, xp = args
+            super().__init__(v_group, x_p, y_p)
+            self.rect = self.image.get_rect().move(TILE_WIDTH * (pos_x + 17), TILE_WIDTH * (pos_y + 17))
+        else:
+            x_p, y_p, yx, yy, xp = args
+            super().__init__(v_group, x_p, y_p)
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
-        self.x = pos_x
-        self.y = pos_y
-        self.yadroy = wy
-        self.yadrox = wx
-        self.delta_x = self.x - self.yadrox
-        self.delta_y = self.y - self.yadroy
+        self.x_p = x_p
+        self.y_p = y_p
+        self.yadroy = yy
+        self.yadrox = yx
+        self.delta_x = + self.x_p - self.yadrox
+        self.delta_y = + self.y_p - self.yadroy
         self.xp = xp
+        self.step_x = round(self.delta_x / 30)
+        self.step_y = round(self.delta_y / 30)
+        self.dele = []
+        print(self.x_p, self.y_p)
+
+    def z_rect(self):
+        self.rect = self.image.get_rect().move(TILE_WIDTH * (self.x_p + 17), TILE_WIDTH * (self.y_p + 17))
+
+    def movement(self):
+        if pygame.sprite.spritecollideany(self, player_group):
+            print(self.x_p, self.y_p, 'dll', self.dele)
+            return
+        self.rect.x -= self.step_x
+        self.rect.y -= self.step_y
+        self.x_p, self.y_p = [self.x_p - self.step_x, self.x_p - self.step_y]
+        self.dele.append([self.x_p, self.y_p])
+        # print(self.step_x, self.step_y)
+        # self.delta_x = - self.x_p + self.yadrox
+        # self.delta_y = - self.y_p + self.yadroy
+        # self.step_x = self.delta_x / 30
+        # self.step_y = self.delta_y / 30
 
     def __str__(self):
         return 'v' + str(self.xp)
@@ -312,15 +341,17 @@ class Camera:
         self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH_MAP // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
 
+
 class Game:
     def __init__(self, flag, name):
         global SIZE_MAP
         self.name = name
         self.controlDB = ControlDataBase()
         self.col_bur = 0
+        self.bots = []
         if flag:
             self.key = random.randint(0, 100000000)
-            SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
+            SIZE_MAP = (60, 60)  # random.randint(200, 400), random.randint(200, 400)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
@@ -328,10 +359,10 @@ class Game:
             self.board_pole = self.board.board
             self.rud = 200
             self.time = 0
-            self.board_player = [['-' for j in range(SIZE_MAP[0])] for i in range(SIZE_MAP[1])]
+            self.board_player = [['-' for _ in range(SIZE_MAP[0])] for _ in range(SIZE_MAP[1])]
         else:
             self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
-            self.board, self.board_player = load_level(str(self.id), self.x, self.y,)
+            self.board, self.board_player = load_level(str(self.id), self.x, self.y, )
             self.player = Player(self.x, self.y)
             self.board_pole = self.board
             SIZE_MAP = len(self.board_pole), len(self.board_pole[0])
@@ -339,6 +370,10 @@ class Game:
                 for j in i:
                     if j.station == 'm':
                         self.col_bur += 1
+            for i in self.board_player:
+                for j in i:
+                    if j != '-':
+                        self.bots.append(j)
         self.camera = Camera(self.player.x, self.player.y)
         self.timer = time.time()
         self.position = ''
@@ -387,11 +422,12 @@ class Game:
                     if event.key == pygame.K_m:
                         self.restart()
             obn += 1
-            if obn == 20:
+
+            if obn == 200:
                 obn = 0
                 self.rud += self.col_bur
                 sec += 1
-                if sec == 1:
+                if sec == 5:
                     self.add()
                     #
                     # self.board_player[self.player.cords[1]][self.player.cords[0]] =\
@@ -399,17 +435,24 @@ class Game:
                     #         -1, 0, 0, 100)
                     sec = 0
             self.camera.update(self.player)
+            # for i in range(len(self.board_player)):
+            #     for j in range(len(self.board_player[i])):
+            #         if self.board_player[i][j] != '-':
+            #             self.board_player[i][j].z_rect(i, j)
+                        # if pygame.sprite.spritecollideany(i, player_group):
+                        #     print(i.x_p, i.y_p, 'dll', i.rect)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
             for sprite in v_group:
-                if sprite.rect.x == 0 and sprite.rect.y == 0:
-                    print(000)
+                if isinstance(sprite, Bot):
+                    sprite.z_rect()
                 self.camera.apply(sprite)
+
             screen_map.fill(pygame.Color(0, 0, 0))
             screen_info.fill(pygame.Color('white'))
             all_sprites.draw(screen_map)
-            player_group.draw(screen_map)
             v_group.draw(screen_map)
+            player_group.draw(screen_map)
             self.update_screen_info()
             screen.blit(screen_map, (0, 0))
             screen.blit(screen_info, (WIDTH_MAP, 0))
@@ -418,14 +461,13 @@ class Game:
 
     def add(self):
         x, y = self.spawn_cord()
-        # x = y = 0
         pos = [x, y]
-        pos = pos[0] + 17 - self.player.x_p, pos[1] + 17 - self.player.y_p
-        if not(KOF_ENEMY * SIZE_MAP[0] < pos[0] < (1 - KOF_ENEMY) * SIZE_MAP[0] and
-               KOF_ENEMY * SIZE_MAP[1] < pos[1] < (1 - KOF_ENEMY) * SIZE_MAP[1]):
-            # print(pos, 'pp')
-            self.board_player[y][x] = Bot(pos[0], pos[1], 0, 0, 100)
-        #self.camera.apply(self.board_player[y][x])
+        pos = pos[0] - self.player.x_p + 17, pos[1] - self.player.y_p + 17
+        if not (KOF_ENEMY * SIZE_MAP[0] < pos[0] < (1 - KOF_ENEMY) * SIZE_MAP[0] and
+                KOF_ENEMY * SIZE_MAP[1] < pos[1] < (1 - KOF_ENEMY) * SIZE_MAP[1]):
+            print(x, y, pos, 'ff')
+        # self.bots.append(Bot(x, y, self.x, self.y, 100))
+        self.board_player[y][x] = Bot(x, y, self.x, self.y, 100)
 
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
@@ -498,20 +540,20 @@ class Game:
             x, y = random.randint(0, SIZE_MAP[0]) - 1, \
                    random.randint(int((1 - KOF_ENEMY) * SIZE_MAP[1]), SIZE_MAP[1]) - 1
 
-        if self.board_pole[y][x] in wall_group: #self.board_player[y][x] in bots_group:
+        if self.board_pole[y][x] in wall_group:
             return self.spawn_cord()
         return x, y
 
     def close(self):
-        ID = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
-                                      self.key, self.x, self.y, self.rud)
-        f = open(f"""map/{ID}map.txt""", 'w')
+        id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
+                                          self.key, self.x, self.y, self.rud)
+        f = open(f"""map/{id_zap}map.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
                 print(self.board_pole[i][j], file=f, end='\t')
             print(file=f)
         f.close()
-        f = open(f"""map/{ID}play.txt""", 'w')
+        f = open(f"""map/{id_zap}play.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
                 print(self.board_player[i][j], file=f, end='\t')
