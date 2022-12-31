@@ -6,7 +6,7 @@ from ContolBD import ControlDataBase
 import sys
 import time
 
-FPS = 200
+FPS = 50
 WIDTH_MAP = HEIGHT = 700
 WIDTH = WIDTH_MAP + 300
 STEP = 10
@@ -98,7 +98,7 @@ def load_level(filename, x, y):
 tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDTH, TILE_WIDTH)),
                'fon': pygame.transform.scale(load_image('fon/fon20.png'), (TILE_WIDTH, TILE_WIDTH)),
                'sten': pygame.transform.scale(load_image('sten.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'mar': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'bot': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
                'yad': pygame.transform.scale(load_image('yadro.png'), (TILE_WIDTH, TILE_WIDTH)),
                'ur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'alm': load_image('almaz.png'),
@@ -108,7 +108,7 @@ tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDT
                'turel_m': load_image('turel_m.jpg'),
                'wal': load_image('wal.png'),
                'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH))}
+               'mar': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH))}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -182,7 +182,7 @@ class MoveableEntity(Entity):
                 self.rect.y -= step
                 return False
         return True
-
+rect_bot = None
 
 class Bot(MoveableEntity):
     def __init__(self, *args):
@@ -200,30 +200,36 @@ class Bot(MoveableEntity):
         self.y_p = y_p
         self.yadroy = yy
         self.yadrox = yx
-        self.delta_x = + self.x_p - self.yadrox
-        self.delta_y = + self.y_p - self.yadroy
+        self.delta_x = - self.x_p + self.yadrox
+        self.delta_y = - self.y_p + self.yadroy
         self.xp = xp
-        self.step_x = round(self.delta_x / 30)
-        self.step_y = round(self.delta_y / 30)
-        self.dele = []
+        self.step_x = self.delta_x / 30
+        self.step_y = self.delta_y / 30
         print(self.x_p, self.y_p)
+        self.flag = True
 
-    def z_rect(self):
-        self.rect = self.image.get_rect().move(TILE_WIDTH * (self.x_p + 17), TILE_WIDTH * (self.y_p + 17))
+    def z_rect(self, x, y):
+        if self.flag:
+            self.flag = False
+            self.rect = self.image.get_rect().\
+                move(TILE_WIDTH * (self.x_p - x + 17),# - (self.yadrox - x)),
+                     TILE_WIDTH * (self.y_p - y + 17))# - (self.yadroy - y)))
+
+            print(self.yadrox, self.yadroy, self.rect)
+        return self.flag
+        # self.movement()
 
     def movement(self):
-        if pygame.sprite.spritecollideany(self, player_group):
-            print(self.x_p, self.y_p, 'dll', self.dele)
+        if pygame.sprite.spritecollideany(self, player_group) or (abs(self.x_p - self.yadrox) <= 1 and abs(self.y_p - self.yadroy) <= 1):
+            print(self.x_p, self.y_p, self.yadrox, self.yadroy)
             return
-        self.rect.x -= self.step_x
-        self.rect.y -= self.step_y
-        self.x_p, self.y_p = [self.x_p - self.step_x, self.x_p - self.step_y]
-        self.dele.append([self.x_p, self.y_p])
-        # print(self.step_x, self.step_y)
-        # self.delta_x = - self.x_p + self.yadrox
-        # self.delta_y = - self.y_p + self.yadroy
-        # self.step_x = self.delta_x / 30
-        # self.step_y = self.delta_y / 30
+        self.rect.x += self.step_x
+        self.rect.y += self.step_y
+        self.x_p, self.y_p = [self.x_p + self.step_x//TILE_WIDTH, self.y_p + self.step_y//TILE_WIDTH]
+        self.delta_x = - self.x_p + self.yadrox
+        self.delta_y = - self.y_p + self.yadroy
+        self.step_x = self.delta_x / 30
+        self.step_y = self.delta_y / 30
 
     def __str__(self):
         return 'v' + str(self.xp)
@@ -336,6 +342,15 @@ class Camera:
         obj.rect.x += self.dx
         obj.rect.y += self.dy
 
+    def apply_bots(self, obj, x, y):
+        global rect_bot
+        obj.rect.x = TILE_WIDTH * (obj.x_p - x + 17)  # - (self.yadrox - x)),
+        obj.rect.y = TILE_WIDTH * (obj.y_p - y + 17)
+        # obj.rect.x += self.dx
+        # obj.rect.y += self.dy
+        if rect_bot != obj.rect:
+            print(obj.rect, obj.x_p, obj.y_p)
+            rect_bot = obj.rect
     # позиционировать камеру на объекте target
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH_MAP // 2)
@@ -351,7 +366,7 @@ class Game:
         self.bots = []
         if flag:
             self.key = random.randint(0, 100000000)
-            SIZE_MAP = (60, 60)  # random.randint(200, 400), random.randint(200, 400)
+            SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
@@ -400,6 +415,13 @@ class Game:
         sec = 0
         while running:
             v = True
+            if obn == 20:
+                obn = 0
+                self.rud += self.col_bur
+                sec += 1
+                if sec == 5:
+                    self.add()
+                    sec = 0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
@@ -421,32 +443,16 @@ class Game:
                         self.player.remove_cord(STEP, 'oy')
                     if event.key == pygame.K_m:
                         self.restart()
-            obn += 1
 
-            if obn == 200:
-                obn = 0
-                self.rud += self.col_bur
-                sec += 1
-                if sec == 5:
-                    self.add()
-                    #
-                    # self.board_player[self.player.cords[1]][self.player.cords[0]] =\
-                    #     Bot(-1,
-                    #         -1, 0, 0, 100)
-                    sec = 0
             self.camera.update(self.player)
-            # for i in range(len(self.board_player)):
-            #     for j in range(len(self.board_player[i])):
-            #         if self.board_player[i][j] != '-':
-            #             self.board_player[i][j].z_rect(i, j)
-                        # if pygame.sprite.spritecollideany(i, player_group):
-                        #     print(i.x_p, i.y_p, 'dll', i.rect)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
             for sprite in v_group:
                 if isinstance(sprite, Bot):
-                    sprite.z_rect()
-                self.camera.apply(sprite)
+                    if not sprite.z_rect(self.player.cords[0], self.player.cords[1]):
+                        self.camera.apply_bots(sprite, self.player.cords[0], self.player.cords[1])
+                else:
+                    self.camera.apply(sprite)
 
             screen_map.fill(pygame.Color(0, 0, 0))
             screen_info.fill(pygame.Color('white'))
@@ -457,17 +463,17 @@ class Game:
             screen.blit(screen_map, (0, 0))
             screen.blit(screen_info, (WIDTH_MAP, 0))
             pygame.display.flip()
+            obn += 1
+            # self.add()
+            # for i in self.bots:
+            #     i.movement()
+
             clock.tick(FPS)
 
     def add(self):
         x, y = self.spawn_cord()
-        pos = [x, y]
-        pos = pos[0] - self.player.x_p + 17, pos[1] - self.player.y_p + 17
-        if not (KOF_ENEMY * SIZE_MAP[0] < pos[0] < (1 - KOF_ENEMY) * SIZE_MAP[0] and
-                KOF_ENEMY * SIZE_MAP[1] < pos[1] < (1 - KOF_ENEMY) * SIZE_MAP[1]):
-            print(x, y, pos, 'ff')
-        # self.bots.append(Bot(x, y, self.x, self.y, 100))
-        self.board_player[y][x] = Bot(x, y, self.x, self.y, 100)
+        self.bots.append(Bot(x, y, self.x, self.y, 100))
+        self.board_player[y][x] = self.bots[-1]
 
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
@@ -542,7 +548,7 @@ class Game:
 
         if self.board_pole[y][x] in wall_group:
             return self.spawn_cord()
-        return x, y
+        return (30, 30)
 
     def close(self):
         id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
