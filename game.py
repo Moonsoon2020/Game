@@ -108,7 +108,8 @@ tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDT
                'turel_m': load_image('turel_m.jpg'),
                'wal': load_image('wal.png'),
                'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'mar': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH))}
+               'mar': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'bur_for_magaz_no_ustan': pygame.transform.scale(load_image('bur_magaz_no_ustanovka.png'), (40, 40))}
 
 
 class Entity(pygame.sprite.Sprite):
@@ -182,7 +183,7 @@ class MoveableEntity(Entity):
                 self.rect.y -= step
                 return False
         return True
-rect_bot = None
+
 
 class Bot(MoveableEntity):
     def __init__(self, *args):
@@ -205,27 +206,24 @@ class Bot(MoveableEntity):
         self.xp = xp
         self.step_x = self.delta_x / 30
         self.step_y = self.delta_y / 30
-        print(self.x_p, self.y_p)
         self.flag = True
 
     def z_rect(self, x, y):
         if self.flag:
             self.flag = False
-            self.rect = self.image.get_rect().\
-                move(TILE_WIDTH * (self.x_p - x + 17),# - (self.yadrox - x)),
-                     TILE_WIDTH * (self.y_p - y + 17))# - (self.yadroy - y)))
-
-            print(self.yadrox, self.yadroy, self.rect)
+            self.rect = self.image.get_rect(). \
+                move(TILE_WIDTH * (self.x_p - x + 17),
+                     TILE_WIDTH * (self.y_p - y + 17))
         return self.flag
-        # self.movement()
 
     def movement(self):
-        if pygame.sprite.spritecollideany(self, player_group) or (abs(self.x_p - self.yadrox) <= 1 and abs(self.y_p - self.yadroy) <= 1):
+        if pygame.sprite.spritecollideany(self, player_group) or (
+                abs(self.x_p - self.yadrox) <= 1 and abs(self.y_p - self.yadroy) <= 1):
             print(self.x_p, self.y_p, self.yadrox, self.yadroy)
             return
         self.rect.x += self.step_x
         self.rect.y += self.step_y
-        self.x_p, self.y_p = [self.x_p + self.step_x//TILE_WIDTH, self.y_p + self.step_y//TILE_WIDTH]
+        self.x_p, self.y_p = [self.x_p + self.step_x // TILE_WIDTH, self.y_p + self.step_y // TILE_WIDTH]
         self.delta_x = - self.x_p + self.yadrox
         self.delta_y = - self.y_p + self.yadroy
         self.step_x = self.delta_x / 30
@@ -343,14 +341,9 @@ class Camera:
         obj.rect.y += self.dy
 
     def apply_bots(self, obj, x, y):
-        global rect_bot
-        obj.rect.x = TILE_WIDTH * (obj.x_p - x + 17)  # - (self.yadrox - x)),
+        obj.rect.x = TILE_WIDTH * (obj.x_p - x + 17)
         obj.rect.y = TILE_WIDTH * (obj.y_p - y + 17)
-        # obj.rect.x += self.dx
-        # obj.rect.y += self.dy
-        if rect_bot != obj.rect:
-            print(obj.rect, obj.x_p, obj.y_p)
-            rect_bot = obj.rect
+
     # позиционировать камеру на объекте target
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH_MAP // 2)
@@ -380,7 +373,7 @@ class Game:
             self.board, self.board_player = load_level(str(self.id), self.x, self.y, )
             self.player = Player(self.x, self.y)
             self.board_pole = self.board
-            SIZE_MAP = len(self.board_pole), len(self.board_pole[0])
+            SIZE_MAP = len(self.board_pole[0]), len(self.board_pole)
             for i in self.board_pole:
                 for j in i:
                     if j.station == 'm':
@@ -405,6 +398,7 @@ class Game:
         self.rud_image = tile_images['alm']
         self.bur_magaz_image = pygame.transform.scale(tile_images['bur_m'], (40, 40))
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
+        self.bur_magaz_image_no_ust = tile_images['bur_for_magaz_no_ustan']
         self.wall_magaz_image = tile_images['wal']
         self.play()
 
@@ -487,6 +481,8 @@ class Game:
                 self.position = 'tur'
             elif 110 <= pos[0] <= 150 and 330 <= pos[1] <= 370:
                 self.position = 'wal'
+            elif 10 <= pos[0] <= 50 and 380 <= pos[1] <= 420:
+                self.position = 'lom'
         else:
             pos = pos[0] // TILE_WIDTH + self.player.cords[0] - 17, pos[1] // TILE_WIDTH + self.player.cords[1] - 17
             print(pos, self.board_pole[pos[1]][pos[0]].station)
@@ -508,6 +504,16 @@ class Game:
                 self.board_pole[pos[1]][pos[0]] = Wall(pos[0] + 17 - self.player.cords[0],
                                                        pos[1] + 17 - self.player.cords[1],
                                                        100, self.board_pole[pos[1]][pos[0]].station)
+            elif self.rud >= 50 and self.position == 'lom' and self.board_pole[pos[1]][pos[0]].station == 's':
+                self.rud -= 50
+                self.board_pole[pos[1]][pos[0]].kill()
+                if random.randint(0, 10) == 0:
+                    self.board_pole[pos[1]][pos[0]] = Block('rud', pos[0] + 17 - self.player.cords[0],
+                                                            pos[1] + 17 - self.player.cords[1], 'r',
+                                                            dop_group=rud_group)
+                else:
+                    self.board_pole[pos[1]][pos[0]] = Block('fon', pos[0] + 17 - self.player.cords[0],
+                                                            pos[1] + 17 - self.player.cords[1], 'f')
 
     def update_screen_info(self):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
@@ -524,12 +530,15 @@ class Game:
         screen_info.blit(self.bur_magaz_image, (10, 330))
         screen_info.blit(self.turel_magaz_image, (60, 330))
         screen_info.blit(self.wall_magaz_image, (110, 330))
+        screen_info.blit(self.bur_magaz_image_no_ust, (10, 380))
         if self.position == 'bur':
             pygame.draw.rect(screen_info, (0, 0, 0), (8, 330, 42, 42), 2)
         elif self.position == 'tur':
             pygame.draw.rect(screen_info, (0, 0, 0), (58, 330, 42, 42), 2)
         elif self.position == 'wal':
             pygame.draw.rect(screen_info, (0, 0, 0), (108, 330, 42, 42), 2)
+        elif self.position == 'lom':
+            pygame.draw.rect(screen_info, (0, 0, 0), (8, 378, 42, 42), 2)
 
     def spawn_cord(self):
         z = random.randint(0, 3)
@@ -548,7 +557,7 @@ class Game:
 
         if self.board_pole[y][x] in wall_group:
             return self.spawn_cord()
-        return (30, 30)
+        return x, y
 
     def close(self):
         id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
