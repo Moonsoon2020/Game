@@ -464,7 +464,7 @@ class Game:
             v = True
             attaks = []
             if sec % 30 == 1:
-                for i in range(min):
+                for i in range(min // 3):
                     self.add()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
