@@ -10,16 +10,14 @@ class ControlDataBase:
                    time           DATETIME NOT NULL,
                    generation_key INTEGER);'''
         tabl2 = '''CREATE TABLE IF NOT EXISTS OpenWorlds (
-    ID             INTEGER  PRIMARY KEY
+                   ID             INTEGER  PRIMARY KEY
                             NOT NULL
                             UNIQUE,
-    time           DATETIME,
-    generation_key INTEGER,
-    name           STRING,
-    x              INTEGER,
-    y              INTEGER
-);
-'''
+                   time           DATETIME,
+                   generation_key INTEGER,
+                   name           STRING,
+                   x              INTEGER,
+                   y              INTEGER);'''
         self.con.execute(tabl1)
         self.con.execute(tabl2)
         self.con.commit()

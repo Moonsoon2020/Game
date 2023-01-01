@@ -70,11 +70,9 @@ def perep0(name, x, y):
         return Wall(x, y, int(name[2:]), name[1])
 
 
-def perep1(name, x, y, x0, y0):
-    if name[0] == 'v':
-        return Bot(x, y, x0, y0, int(name[1:]))
-    elif name[0] == '-':
-        return '-'
+def perep1(name, x0, y0):
+    return Bot(float(name[name.index('#') + 1:name.index(':')]), float(name[name.index(':') + 1:]),
+               x0, y0, int(name[:name.index('#')]))
 
 
 def load_level(filename, x, y):
@@ -88,9 +86,9 @@ def load_level(filename, x, y):
     os.remove(filename0)
     filename1 = "map/" + filename + 'play.txt'
     with open(filename1, 'r') as mapFile:
-        level_map = [line.split() for line in mapFile]
+        level_map = [line for line in mapFile]
 
-    board1 = [[perep1(level_map[i][j], j, i, x, y) for j in range(len(level_map[i]))] for i in range(len(level_map))]
+    board1 = [perep1(level_map[i], x, y) for i in range(len(level_map))]
     os.remove(filename1)
     return board0, board1
 
@@ -204,9 +202,11 @@ class Bot(MoveableEntity):
         self.delta_x = - self.x_p + self.yadrox
         self.delta_y = - self.y_p + self.yadroy
         self.xp = xp
-        self.step_x = self.delta_x / 30
-        self.step_y = self.delta_y / 30
+        self.step_x = self.delta_x / 100
+        self.step_y = self.delta_y / 100
         self.flag = True
+        self.smes_x = 0
+        self.smes_y = 0
 
     def z_rect(self, x, y):
         if self.flag:
@@ -219,18 +219,20 @@ class Bot(MoveableEntity):
     def movement(self):
         if pygame.sprite.spritecollideany(self, player_group) or (
                 abs(self.x_p - self.yadrox) <= 1 and abs(self.y_p - self.yadroy) <= 1):
-            print(self.x_p, self.y_p, self.yadrox, self.yadroy)
+            print(self.x_p, self.y_p, self.rect)
             return
-        self.rect.x += self.step_x
-        self.rect.y += self.step_y
-        self.x_p, self.y_p = [self.x_p + self.step_x // TILE_WIDTH, self.y_p + self.step_y // TILE_WIDTH]
+        # self.rect.x += self.step_x
+        # self.rect.y += self.step_y
+        self.smes_y += self.step_y
+        self.smes_x += self.step_x
+        self.x_p, self.y_p = [self.x_p + self.step_x, self.y_p + self.step_y]
         self.delta_x = - self.x_p + self.yadrox
         self.delta_y = - self.y_p + self.yadroy
-        self.step_x = self.delta_x / 30
-        self.step_y = self.delta_y / 30
+        self.step_x = min(0.5, self.delta_x / 100)
+        self.step_y = min(0.5, self.delta_y / 100)
 
     def __str__(self):
-        return 'v' + str(self.xp)
+        return str(self.xp) + '#' + str(float(self.x_p)) + ':' + str(float(self.y_p))
 
 
 def terminate():
@@ -340,9 +342,13 @@ class Camera:
         obj.rect.x += self.dx
         obj.rect.y += self.dy
 
-    def apply_bots(self, obj, x, y):
+    def apply_bots(self, obj, x, y, flag):
         obj.rect.x = TILE_WIDTH * (obj.x_p - x + 17)
         obj.rect.y = TILE_WIDTH * (obj.y_p - y + 17)
+        obj.rect.x += obj.smes_x
+        obj.rect.y += obj.smes_y
+        if flag:
+            obj.movement()
 
     # позиционировать камеру на объекте target
     def update(self, target):
@@ -359,7 +365,7 @@ class Game:
         self.bots = []
         if flag:
             self.key = random.randint(0, 100000000)
-            SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
+            SIZE_MAP = (60, 60) #random.randint(200, 400), random.randint(200, 400)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
@@ -367,10 +373,9 @@ class Game:
             self.board_pole = self.board.board
             self.rud = 200
             self.time = 0
-            self.board_player = [['-' for _ in range(SIZE_MAP[0])] for _ in range(SIZE_MAP[1])]
         else:
             self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
-            self.board, self.board_player = load_level(str(self.id), self.x, self.y, )
+            self.board, self.bots = load_level(str(self.id), self.x, self.y)
             self.player = Player(self.x, self.y)
             self.board_pole = self.board
             SIZE_MAP = len(self.board_pole[0]), len(self.board_pole)
@@ -378,10 +383,6 @@ class Game:
                 for j in i:
                     if j.station == 'm':
                         self.col_bur += 1
-            for i in self.board_player:
-                for j in i:
-                    if j != '-':
-                        self.bots.append(j)
         self.camera = Camera(self.player.x, self.player.y)
         self.timer = time.time()
         self.position = ''
@@ -444,7 +445,7 @@ class Game:
             for sprite in v_group:
                 if isinstance(sprite, Bot):
                     if not sprite.z_rect(self.player.cords[0], self.player.cords[1]):
-                        self.camera.apply_bots(sprite, self.player.cords[0], self.player.cords[1])
+                        self.camera.apply_bots(sprite, self.player.cords[0], self.player.cords[1], obn == 0 or obn == 10)
                 else:
                     self.camera.apply(sprite)
 
@@ -467,7 +468,6 @@ class Game:
     def add(self):
         x, y = self.spawn_cord()
         self.bots.append(Bot(x, y, self.x, self.y, 100))
-        self.board_player[y][x] = self.bots[-1]
 
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
@@ -569,8 +569,6 @@ class Game:
             print(file=f)
         f.close()
         f = open(f"""map/{id_zap}play.txt""", 'w')
-        for i in range(len(self.board_pole)):
-            for j in range(len(self.board_pole[i])):
-                print(self.board_player[i][j], file=f, end='\t')
-            print(file=f)
+        for i in self.bots:
+            print(i, file=f)
         f.close()
