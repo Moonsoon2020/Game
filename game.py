@@ -412,8 +412,8 @@ class Game:
         self.col_bur = 0
         if flag:
             self.key = random.randint(0, 100000000)
-            SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
-            SIZE_MAP = (60, 60)
+            SIZE_MAP = random.randint(100, 400), random.randint(100, 400)
+            # SIZE_MAP = (60, 60)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
@@ -461,6 +461,10 @@ class Game:
         self.obn = 0
         self.sec = 0 + self.time % 60
         self.min = 0 + self.time // 60
+        attaks = None
+        curl = None
+        curli = None
+        collided_sprites = None
         while running:
             v = True
             attaks = []
@@ -474,21 +478,23 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.click(event.pos)
                 elif event.type == pygame.KEYDOWN and v:
+                    if event.key == pygame.K_p:
+                        self.close()
+                        running = False
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         v = False
                         self.player.remove_cord(-STEP, 'ox')
-                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         v = False
                         self.player.remove_cord(STEP, 'ox')
-                    if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    elif event.key == pygame.K_UP or event.key == pygame.K_w:
                         v = False
                         self.player.remove_cord(-STEP, 'oy')
-                    if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                         v = False
                         self.player.remove_cord(STEP, 'oy')
-                    if event.key == pygame.K_m:
+                    elif event.key == pygame.K_m:
                         self.restart()
-
             self.camera.update(self.player)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
@@ -537,7 +543,7 @@ class Game:
                     self.sec = 0
                     self.min += 1
                     self.rud += 1
-            screen_map.fill(pygame.Color(0, 0, 0))
+            screen_map.fill(pygame.Color('black'))
             screen_info.fill(pygame.Color('white'))
             all_sprites.draw(screen_map)
             v_group.draw(screen_map)
@@ -552,6 +558,7 @@ class Game:
             pygame.display.flip()
             self.obn += 1
             clock.tick(FPS)
+            print(sys.getsizeof(collided_sprites))
 
     def add(self, xp):
         x, y = self.spawn_cord()
