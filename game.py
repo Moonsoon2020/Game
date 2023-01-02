@@ -59,19 +59,19 @@ def load_image(name, color_key=None):
 
 def perep0(name, x, y):
     if name[0] == 'f':  # фон
-        return Block('fon', x, y, 'f')
+        return Block('fon', x, y, x, y, 'f')
     elif name[0] == 'r':  # руда
-        return Block('rud', x, y, 'r', rud_group)
+        return Block('rud', x, y, x, y, 'r', rud_group)
     elif name[0] == 's':  # стена
-        return Wall(x, y, 100)
+        return Wall(x, y, x, y, int(name[1:]))
     elif name[0] == 'y':  # ядро
-        return Core(x, y, int(name[1:]))
+        return Core(x, y, x, y, int(name[1:]))
     elif name[0] == 'm':  # бур
-        return Mine(x, y, int(name[1:]))
+        return Mine(x, y, x, y, int(name[1:]))
     elif name[0] == 't':  # турель
-        return Turel(x, y, int(name[1:]))
+        return Turel(x, y, x, y, int(name[1:]))
     elif name[0] == 'w':  # стена само построенная
-        return Wall_Ust(x, y, int(name[1:]))
+        return Wall_Ust(x, y, x, y, int(name[1:]))
 
 
 def perep1(name, x0, y0):
@@ -92,9 +92,9 @@ def load_level(filename, x, y):
     with open(filename1, 'r') as mapFile:
         level_map = [line for line in mapFile]
 
-    board1 = [perep1(level_map[i], x, y) for i in range(len(level_map))]
+    [perep1(level_map[i], x, y) for i in range(len(level_map))]
     os.remove(filename1)
-    return board0, board1
+    return board0
 
 
 tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDTH, TILE_WIDTH)),
@@ -120,15 +120,15 @@ class Entity(pygame.sprite.Sprite):
 
 
 class Block(Entity):
-    def __init__(self, block_type, pos_x, pos_y, station, *dop_group):
+    def __init__(self, block_type, pos_x, pos_y, x, y, station, *dop_group):
         super(Block, self).__init__(all_sprites, block_group, dop_group)
         self.image = tile_images[block_type]
         self.station = station
         self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
         self.mask = pygame.mask.from_surface(self.image)
         self.xp = None
-        self.x = pos_x
-        self.y = pos_y
+        self.x = x
+        self.y = y
 
     def __str__(self):
         if self.xp is None:
@@ -141,33 +141,34 @@ class Block(Entity):
 
 
 class Wall(Block):
-    def __init__(self, pos_x, pos_y, xp):
-        super().__init__('sten', pos_x, pos_y, 's', wall_group)
+    def __init__(self, pos_x, pos_y, x, y, xp):
+        super().__init__('sten', pos_x, pos_y, x, y, 's', wall_group)
         self.xp = xp
 
 
 class Core(Block):
-    def __init__(self, pos_x, pos_y, xp, dop_group=block_group):
-        super().__init__('yad', pos_x, pos_y, 'y', dop_group, ust_block)
+    def __init__(self, pos_x, pos_y, x, y, xp, dop_group=block_group):
+        super().__init__('yad', pos_x, pos_y, x, y, 'y', dop_group, ust_block)
         self.xp = xp
 
 
 class Turel(Block):
-    def __init__(self, pos_x, pos_y, xp):
-        super().__init__('tur', pos_x, pos_y, 't', turel_group, ust_block)
+    def __init__(self, pos_x, pos_y, x, y, xp):
+        super().__init__('tur', pos_x, pos_y, x, y, 't', turel_group, ust_block)
         self.xp = xp
         self.radius = 10 * TILE_WIDTH
         self.damage = 10
 
+
 class Mine(Block):
-    def __init__(self, pos_x, pos_y, xp):
-        super().__init__('mine', pos_x, pos_y, 'm', mine_group, ust_block)
+    def __init__(self, pos_x, pos_y, x, y, xp):
+        super().__init__('mine', pos_x, pos_y, x, y, 'm', mine_group, ust_block)
         self.xp = xp
 
 
 class Wall_Ust(Block):
-    def __init__(self, pos_x, pos_y, xp):
-        super().__init__('wal2', pos_x, pos_y, 'w', wall_ust_group, ust_block)
+    def __init__(self, pos_x, pos_y, x, y, xp):
+        super().__init__('wal2', pos_x, pos_y, x, y, 'w', wall_ust_group, ust_block)
         self.xp = xp
 
 
@@ -232,9 +233,6 @@ class Bot(MoveableEntity):
         return self.flag
 
     def movement(self):
-        if pygame.sprite.spritecollideany(self, player_group) or (
-                abs(self.x_p - self.yadrox) <= 3 and abs(self.y_p - self.yadroy) <= 3):
-            return
         self.x_p0, self.y_p0 = self.x_p, self.y_p
         self.delta_x0 = self.delta_x
         self.delta_y0 = self.delta_y
@@ -335,11 +333,11 @@ class GeneratePlay:
 
     def enterprited(self, n, x, y):
         if n == 128:
-            return Block('fon', x, y, 'f')
+            return Block('fon', x, y, x, y, 'f')
         elif n == 170:
-            return Block('rud', x, y, 'r', rud_group)
+            return Block('rud', x, y, x, y, 'r', rud_group)
         else:
-            return Wall(x, y, 200)
+            return Wall(x, y, x, y, 200)
 
     def start_cord(self):
         cord = random.randint(int(KOF_START * SIZE_MAP[0]), int(SIZE_MAP[0] * (1 - KOF_START))), \
@@ -372,8 +370,8 @@ class Camera:
                                                       False, collided=circle_collision)
         curcles = []
 
-        for collided_sprite in collided_sprites:
-            curcles.append([collided_sprite.rect.center, collided_sprite.radius])
+        for collided_sprite_bot, collided_sprite_block in collided_sprites.items():
+            curcles.extend([collided_sprite_bot.rect.center, collided_sprite_block[0].rect.center])
         if flag:
             obj.movement()
             stok = pygame.sprite.spritecollide(obj, wall_group, False)
@@ -412,21 +410,20 @@ class Game:
         self.name = name
         self.controlDB = ControlDataBase()
         self.col_bur = 0
-        self.bots = []
         if flag:
             self.key = random.randint(0, 100000000)
             SIZE_MAP = random.randint(200, 400), random.randint(200, 400)
-            # SIZE_MAP = (60, 60)
+            SIZE_MAP = (60, 60)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
-            self.board.remove(Core(self.x, self.y, 1000), self.x, self.y)
+            self.board.remove(Core(self.x, self.y, self.x, self.y, 1000), self.x, self.y)
             self.board_pole = self.board.board
             self.rud = 300
             self.time = 0
         else:
             self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
-            self.board, self.bots = load_level(str(self.id), self.x, self.y)
+            self.board = load_level(str(self.id), self.x, self.y)
             self.player = Player(self.x, self.y)
             self.board_pole = self.board
             SIZE_MAP = len(self.board_pole[0]), len(self.board_pole)
@@ -443,6 +440,10 @@ class Game:
         self.intro_rect1 = self.string_text1.get_rect()
         self.intro_rect1.x = 60
         self.intro_rect1.y = 10
+        self.string_text4 = self.font.render('Координаты:', True, pygame.Color('black'))
+        self.intro_rect4 = self.string_text1.get_rect()
+        self.intro_rect4.x = 10
+        self.intro_rect4.y = 90
         self.string_text2 = self.font.render('Постройки Комплекса', True, pygame.Color('black'))
         self.intro_rect2 = self.string_text2.get_rect()
         self.intro_rect2.x = 50
@@ -457,15 +458,15 @@ class Game:
     def play(self):
         clock = pygame.time.Clock()
         running = True
-        obn = 0
-        sec = 0 + self.time % 60
-        min = 0 + self.time // 60
+        self.obn = 0
+        self.sec = 0 + self.time % 60
+        self.min = 0 + self.time // 60
         while running:
             v = True
             attaks = []
-            if sec % 30 == 1:
-                for i in range(min // 3):
-                    self.add()
+            if self.sec % 30 == 1 and self.obn == 1:
+                for i in range(10):
+                    self.add(self.min)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
@@ -496,35 +497,35 @@ class Game:
                 if isinstance(sprite, Bot):
                     if not sprite.z_rect(self.player.cords[0], self.player.cords[1]):
                         x, y, curli = self.camera.apply_bots(sprite, self.player.cords[0],
-                                                             self.player.cords[1], obn == 0 or obn == 10)
-                        curl.extend(curli)
+                                                             self.player.cords[1], self.obn % 10 == 0)
+                        if curli:
+                            curl.append(curli)
+
                         if self.y == y and self.x == x:
                             self.end()
                             running = False
-                        if x != -1 and y != -1:
+                        elif x != -1 and y != -1:
                             if isinstance(self.board_pole[y][x], Mine):
                                 self.col_bur -= 1
                             if random.randint(0, 10) == 0:
                                 self.board_pole[y][x] = Block('rud', x + 17 - self.player.cords[0],
-                                                              y + 17 - self.player.cords[1], 'r', rud_group)
+                                                              y + 17 - self.player.cords[1], x, y, 'r', rud_group)
                             else:
                                 self.board_pole[y][x] = Block('fon', x + 17 - self.player.cords[0],
-                                                              y + 17 - self.player.cords[1], 'f')
+                                                              y + 17 - self.player.cords[1], x, y, 'f')
+
                 else:
                     self.camera.apply(sprite)
             collided_sprites = pygame.sprite.groupcollide(turel_group, bots_group, False,
                                                           False, collided=circle_collision)
             for collided_sprite_tur, collided_sprite_bot in collided_sprites.items():
                 if self.rud >= 1:
-                    attaks.append([collided_sprite_tur.rect.center, collided_sprite_tur.radius])
-            if obn == 20:
+                    attaks.append([collided_sprite_tur.rect.center, collided_sprite_bot[0].rect.center])
+            if self.obn == 50:
                 # обновлять для экрана
-                collided_sprites = pygame.sprite.groupcollide(turel_group, bots_group, False,
-                                                              False, collided=circle_collision)
-                obn = 0
-
+                self.obn = 0
                 self.rud += self.col_bur
-                sec += 1
+                self.sec += 1
                 for collided_sprite_tur, collided_sprite_bot in collided_sprites.items():
                     collided_sprite_bot = collided_sprite_bot[0]
                     if self.rud >= 1:
@@ -532,9 +533,9 @@ class Game:
                         self.rud -= 1
                         if collided_sprite_bot.xp <= 0:
                             collided_sprite_bot.kill()
-                if sec == 60:
-                    sec = 0
-                    min += 1
+                if self.sec == 60:
+                    self.sec = 0
+                    self.min += 1
                     self.rud += 1
             screen_map.fill(pygame.Color(0, 0, 0))
             screen_info.fill(pygame.Color('white'))
@@ -542,20 +543,19 @@ class Game:
             v_group.draw(screen_map)
             player_group.draw(screen_map)
             for i in curl:
-                pygame.draw.circle(screen_map, 'red', i[0], i[1], 2)
+                pygame.draw.aaline(screen_map, 'red', i[0], i[1], 4)
             for i in attaks:
-                pygame.draw.circle(screen_map, 'green', i[0], i[1], 2)
+                pygame.draw.aaline(screen_map, 'green', i[0], i[1], 2)
             self.update_screen_info()
             screen.blit(screen_map, (0, 0))
             screen.blit(screen_info, (WIDTH_MAP, 0))
             pygame.display.flip()
-            obn += 1
-
+            self.obn += 1
             clock.tick(FPS)
 
-    def add(self):
+    def add(self, xp):
         x, y = self.spawn_cord()
-        self.bots.append(Bot(x, y, self.x, self.y, 100))
+        Bot(x, y, self.x, self.y, (xp + 1) * 10)
 
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
@@ -574,45 +574,57 @@ class Game:
         else:
             pos = pos[0] // TILE_WIDTH + self.player.cords[0] - 17, pos[1] // TILE_WIDTH + self.player.cords[1] - 17
             print(pos, self.board_pole[pos[1]][pos[0]].station)
-            if self.board_pole[pos[1]][pos[0]].station == 'r' and self.rud >= 50 and self.position == 'bur':
+            if self.rud >= 50 and self.position == 'bur' and \
+                    (self.board_pole[pos[1]][pos[0]].station == 'm' or self.board_pole[pos[1]][pos[0]].station == 'r'):
                 self.rud -= 50
                 self.board_pole[pos[1]][pos[0]] = Mine(pos[0] + 17 - self.player.cords[0],
-                                                       pos[1] + 17 - self.player.cords[1],
+                                                       pos[1] + 17 - self.player.cords[1], pos[0], pos[1],
                                                        100)
                 self.col_bur += 1
             elif self.rud >= 70 and self.position == 'tur' and self.board_pole[pos[1]][pos[0]].station != 's' and \
                     self.board_pole[pos[1]][pos[0]].station != 'y':
                 self.rud -= 70
                 self.board_pole[pos[1]][pos[0]] = Turel(pos[0] + 17 - self.player.cords[0],
-                                                        pos[1] + 17 - self.player.cords[1],
+                                                        pos[1] + 17 - self.player.cords[1], pos[0], pos[1],
                                                         100)
             elif self.rud >= 50 and self.position == 'wal' and self.board_pole[pos[1]][pos[0]].station != 's' and \
                     self.board_pole[pos[1]][pos[0]].station != 'y':
                 self.rud -= 50
                 self.board_pole[pos[1]][pos[0]] = Wall_Ust(pos[0] + 17 - self.player.cords[0],
-                                                           pos[1] + 17 - self.player.cords[1],
+                                                           pos[1] + 17 - self.player.cords[1], pos[0], pos[1],
                                                            500)
             elif self.rud >= 30 and self.position == 'lom' and self.board_pole[pos[1]][pos[0]].station == 's':
                 self.rud -= 30
                 self.board_pole[pos[1]][pos[0]].kill()
                 if random.randint(0, 10) == 0:
                     self.board_pole[pos[1]][pos[0]] = Block('rud', pos[0] + 17 - self.player.cords[0],
-                                                            pos[1] + 17 - self.player.cords[1], 'r', rud_group)
+                                                            pos[1] + 17 - self.player.cords[1], pos[0], pos[1], 'r',
+                                                            rud_group)
                 else:
                     self.board_pole[pos[1]][pos[0]] = Block('fon', pos[0] + 17 - self.player.cords[0],
-                                                            pos[1] + 17 - self.player.cords[1], 'f')
+                                                            pos[1] + 17 - self.player.cords[1], pos[0], pos[1], 'f')
 
     def update_screen_info(self):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
         pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
-        string_text3 = self.font.render('-  ' + str(self.rud) +
-                                        f' {self.player.cords[0]}, {self.player.cords[1]}', True, pygame.Color('black'))
-        intro_rect3 = self.string_text1.get_rect()
+        string_text3 = self.font.render('-  ' + str(self.rud), True, pygame.Color('black'))
+        intro_rect3 = string_text3.get_rect()
         intro_rect3.x = 60
         intro_rect3.y = 50
+        string_text5 = self.font.render(f' {self.player.cords[0]} {self.player.cords[1]}', True, pygame.Color('black'))
+        intro_rect5 = string_text5.get_rect()
+        intro_rect5.x = 150
+        intro_rect5.y = 90
+        string_text6 = self.font.render(f' {self.min} {self.sec}', True, pygame.Color('black'))
+        intro_rect6 = string_text6.get_rect()
+        intro_rect6.x = 150
+        intro_rect6.y = 120
         screen_info.blit(self.string_text1, self.intro_rect1)
         screen_info.blit(self.string_text2, self.intro_rect2)
+        screen_info.blit(self.string_text4, self.intro_rect4)
         screen_info.blit(string_text3, intro_rect3)
+        screen_info.blit(string_text5, intro_rect5)
+        screen_info.blit(string_text6, intro_rect6)
         screen_info.blit(self.rud_image, (10, 40))
         screen_info.blit(self.bur_magaz_image, (10, 330))
         screen_info.blit(self.turel_magaz_image, (60, 330))
@@ -656,8 +668,9 @@ class Game:
             print(file=f)
         f.close()
         f = open(f"""map/{id_zap}play.txt""", 'w')
-        for i in self.bots:
-            print(i, file=f)
+        for i in bots_group:
+            if i.xp > 0:
+                print(i, file=f)
         f.close()
 
     def end(self):
