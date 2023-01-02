@@ -18,6 +18,7 @@ class ControlDataBase:
                    name           STRING,
                    x              INTEGER,
                    y              INTEGER);'''
+
         self.con.execute(tabl1)
         self.con.execute(tabl2)
         self.con.commit()
