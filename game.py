@@ -19,6 +19,7 @@ TILE_WIDTH = 20
 RES_MAP = 5
 RES_RUD = 2
 SIZE_MAP = -1, -1
+KRAY = 17
 
 all_sprites = pygame.sprite.Group()
 block_group = pygame.sprite.Group()
@@ -97,10 +98,10 @@ def load_level(filename, x, y):
     return board0
 
 
-tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'fon': pygame.transform.scale(load_image('fon/fon20.png'), (TILE_WIDTH, TILE_WIDTH)),
+tile_images = {'rud': pygame.transform.scale(load_image('rud.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'fon': pygame.transform.scale(load_image('fon.png'), (TILE_WIDTH, TILE_WIDTH)),
                'sten': pygame.transform.scale(load_image('sten.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'bot': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
                'yad': pygame.transform.scale(load_image('yadro.png'), (TILE_WIDTH, TILE_WIDTH)),
                'ur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'alm': load_image('almaz.png'),
@@ -110,7 +111,7 @@ tile_images = {'rud': pygame.transform.scale(load_image('rud20.png'), (TILE_WIDT
                'turel_m': load_image('turel_m.jpg'),
                'wal': load_image('wal.png'),
                'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'mar': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'mar': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
                'bur_for_magaz_no_ustan': pygame.transform.scale(load_image('bur_magaz_no_ustanovka.png'), (40, 40))}
 
 
@@ -204,7 +205,7 @@ class Bot(MoveableEntity):
         if len(args) == 7:
             pos_x, pos_y, x_p, y_p, yx, yy, xp = args
             super().__init__(bots_group, x_p, y_p)
-            self.rect = self.image.get_rect().move(TILE_WIDTH * (pos_x + 17), TILE_WIDTH * (pos_y + 17))
+            self.rect = self.image.get_rect().move(TILE_WIDTH * (pos_x + KRAY), TILE_WIDTH * (pos_y + KRAY))
         else:
             x_p, y_p, yx, yy, xp = args
             super().__init__(bots_group, x_p, y_p)
@@ -228,8 +229,8 @@ class Bot(MoveableEntity):
         if self.flag:
             self.flag = False
             self.rect = self.image.get_rect(). \
-                move(TILE_WIDTH * (self.x_p - x + 17),
-                     TILE_WIDTH * (self.y_p - y + 17))
+                move(TILE_WIDTH * (self.x_p - x + KRAY),
+                     TILE_WIDTH * (self.y_p - y + KRAY))
         return self.flag
 
     def movement(self):
@@ -274,12 +275,12 @@ class Player(MoveableEntity):
     def remove_cord(self, step, paral):
         st = 1 if step > 0 else -1
         if paral == 'ox':
-            if 17 <= self.cords[0] + st <= SIZE_MAP[0] - 18 and self.remove_cord_ox(step):
+            if KRAY <= self.cords[0] + st <= SIZE_MAP[0] - KRAY - 1 and self.remove_cord_ox(step):
                 self.cords[0] += st
                 self.rect.x += step
                 self.x_p += step
         else:
-            if 17 <= self.cords[1] + st <= SIZE_MAP[1] - 18 and self.remove_cord_oy(step):
+            if KRAY <= self.cords[1] + st <= SIZE_MAP[1] - KRAY - 1 and self.remove_cord_oy(step):
                 self.cords[1] += st
                 self.rect.y += step
                 self.y_p += step
@@ -363,8 +364,8 @@ class Camera:
         obj.rect.y += self.dy
 
     def apply_bots(self, obj, x, y, flag):
-        obj.rect.x = TILE_WIDTH * (obj.x_p - x + 17)
-        obj.rect.y = TILE_WIDTH * (obj.y_p - y + 17)
+        obj.rect.x = TILE_WIDTH * (obj.x_p - x + KRAY)
+        obj.rect.y = TILE_WIDTH * (obj.y_p - y + KRAY)
         x0, y0 = -1, -1
         collided_sprites = pygame.sprite.groupcollide([obj], ust_block, False,
                                                       False, collided=circle_collision)
@@ -514,11 +515,11 @@ class Game:
                             if isinstance(self.board_pole[y][x], Mine):
                                 self.col_bur -= 1
                             if random.randint(0, 10) == 0:
-                                self.board_pole[y][x] = Block('rud', x + 17 - self.player.cords[0],
-                                                              y + 17 - self.player.cords[1], x, y, 'r', rud_group)
+                                self.board_pole[y][x] = Block('rud', x + KRAY - self.player.cords[0],
+                                                              y + KRAY - self.player.cords[1], x, y, 'r', rud_group)
                             else:
-                                self.board_pole[y][x] = Block('fon', x + 17 - self.player.cords[0],
-                                                              y + 17 - self.player.cords[1], x, y, 'f')
+                                self.board_pole[y][x] = Block('fon', x + KRAY - self.player.cords[0],
+                                                              y + KRAY - self.player.cords[1], x, y, 'f')
 
                 else:
                     self.camera.apply(sprite)
@@ -562,7 +563,7 @@ class Game:
 
     def add(self, xp):
         x, y = self.spawn_cord()
-        Bot(x, y, self.x, self.y, (xp + 1) * 10)
+        Bot(x, y, self.x, self.y, (xp + 1) * 15)
 
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
@@ -579,37 +580,38 @@ class Game:
             elif 10 <= pos[0] <= 50 and 380 <= pos[1] <= 420:
                 self.position = 'lom'
         else:
-            pos = pos[0] // TILE_WIDTH + self.player.cords[0] - 17, pos[1] // TILE_WIDTH + self.player.cords[1] - 17
+            pos = pos[0] // TILE_WIDTH + self.player.cords[0] - KRAY,\
+                  pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY
             print(pos, self.board_pole[pos[1]][pos[0]].station)
             if self.rud >= 50 and self.position == 'bur' and \
                     (self.board_pole[pos[1]][pos[0]].station == 'm' or self.board_pole[pos[1]][pos[0]].station == 'r'):
                 self.rud -= 50
-                self.board_pole[pos[1]][pos[0]] = Mine(pos[0] + 17 - self.player.cords[0],
-                                                       pos[1] + 17 - self.player.cords[1], pos[0], pos[1],
+                self.board_pole[pos[1]][pos[0]] = Mine(pos[0] + KRAY - self.player.cords[0],
+                                                       pos[1] + KRAY - self.player.cords[1], pos[0], pos[1],
                                                        100)
                 self.col_bur += 1
             elif self.rud >= 70 and self.position == 'tur' and self.board_pole[pos[1]][pos[0]].station != 's' and \
                     self.board_pole[pos[1]][pos[0]].station != 'y':
                 self.rud -= 70
-                self.board_pole[pos[1]][pos[0]] = Turel(pos[0] + 17 - self.player.cords[0],
-                                                        pos[1] + 17 - self.player.cords[1], pos[0], pos[1],
+                self.board_pole[pos[1]][pos[0]] = Turel(pos[0] + KRAY - self.player.cords[0],
+                                                        pos[1] + KRAY - self.player.cords[1], pos[0], pos[1],
                                                         100)
             elif self.rud >= 50 and self.position == 'wal' and self.board_pole[pos[1]][pos[0]].station != 's' and \
                     self.board_pole[pos[1]][pos[0]].station != 'y':
                 self.rud -= 50
-                self.board_pole[pos[1]][pos[0]] = Wall_Ust(pos[0] + 17 - self.player.cords[0],
-                                                           pos[1] + 17 - self.player.cords[1], pos[0], pos[1],
+                self.board_pole[pos[1]][pos[0]] = Wall_Ust(pos[0] + KRAY - self.player.cords[0],
+                                                           pos[1] + KRAY - self.player.cords[1], pos[0], pos[1],
                                                            500)
             elif self.rud >= 30 and self.position == 'lom' and self.board_pole[pos[1]][pos[0]].station == 's':
                 self.rud -= 30
                 self.board_pole[pos[1]][pos[0]].kill()
                 if random.randint(0, 10) == 0:
-                    self.board_pole[pos[1]][pos[0]] = Block('rud', pos[0] + 17 - self.player.cords[0],
-                                                            pos[1] + 17 - self.player.cords[1], pos[0], pos[1], 'r',
+                    self.board_pole[pos[1]][pos[0]] = Block('rud', pos[0] + KRAY - self.player.cords[0],
+                                                            pos[1] + KRAY - self.player.cords[1], pos[0], pos[1], 'r',
                                                             rud_group)
                 else:
-                    self.board_pole[pos[1]][pos[0]] = Block('fon', pos[0] + 17 - self.player.cords[0],
-                                                            pos[1] + 17 - self.player.cords[1], pos[0], pos[1], 'f')
+                    self.board_pole[pos[1]][pos[0]] = Block('fon', pos[0] + KRAY - self.player.cords[0],
+                                                            pos[1] + KRAY - self.player.cords[1], pos[0], pos[1], 'f')
 
     def update_screen_info(self):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)

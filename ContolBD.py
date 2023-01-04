@@ -9,7 +9,7 @@ class ControlDataBase:
                    name           TEXT     NOT NULL,
                    time           DATETIME NOT NULL,
                    generation_key INTEGER);'''
-        tabl2 = '''CREATE TABLE OpenWorlds (
+        tabl2 = '''CREATE TABLE IF NOT EXISTS OpenWorlds (
     ID             INTEGER  PRIMARY KEY
                             NOT NULL
                             UNIQUE,
