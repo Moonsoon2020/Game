@@ -17,7 +17,7 @@ SIZE_WINDOW = WIDTH_MAP, HEIGHT
 STEP = TILE_WIDTH = 34
 RES_MAP = 5
 RES_RUD = 2
-RES_BIOM = 20
+RES_BIOM = 15
 SIZE_MAP = -1, -1
 KRAY = 10
 
@@ -72,19 +72,19 @@ def perep0(name, x, y):
         return Mine(x, y, x, y, int(name[3:]), var)
     elif name[0] == 't':  # турель
         return Turel(x, y, x, y, int(name[3:]), var)
-    elif name[0] == 'w':  # стена само построенная
+    elif name[0] == 'w':  # стена само построенная(персом)
         return Wall_Ust(x, y, x, y, int(name[3:]), var)
 
 
 def perep1(name, x0, y0):
-    return Bot(float(name[name.index('#') + 1:name.index(':')]), float(name[name.index(':') + 1:]),
+    bot = Bot(float(name[name.index('#') + 1:name.index(':')]), float(name[name.index(':') + 1:]),
                x0, y0, int(name[:name.index('#')]))
+    bot.z_rect(x0, y0)
 
 
 def load_level(filename, x, y):
     ControlDataBase().del_world(filename)
     filename0 = "map/" + filename + 'map.txt'
-    # читаем уровень, убирая символы перевода строки
     with open(filename0, 'r') as mapFile:
         level_map = [line.split() for line in mapFile]
 
@@ -105,11 +105,16 @@ tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_W
                'v2rud': pygame.transform.scale(load_image('v2/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
                'v2fon': pygame.transform.scale(load_image('v2/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
                'v2sten': pygame.transform.scale(load_image('v2/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'v3rud': pygame.transform.scale(load_image('v3/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'v3fon': pygame.transform.scale(load_image('v3/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'v3sten': pygame.transform.scale(load_image('v3/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
                'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'yad': pygame.transform.scale(load_image('yadro.png'), (TILE_WIDTH, TILE_WIDTH)),
+               'yad': [pygame.transform.scale(load_image(f'yadro/Layer 1_sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
+                                              (TILE_WIDTH, TILE_WIDTH)) for i in range(1, 19)],
                'ur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'alm': load_image('almaz.png'),
-               'mine': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
+               'mine': [pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
+                                               (TILE_WIDTH, TILE_WIDTH)) for i in range(25)],
                'bur_m': load_image('bur_magaz.jpg'),
                'tur': pygame.transform.scale(load_image('turel.png'), (TILE_WIDTH, TILE_WIDTH)),
                'turel_m': load_image('turel.png'),
@@ -146,13 +151,41 @@ class Block(Entity):
         return self.x, self.y
 
 
+class AnimatedBlock(Entity):
+    def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
+        super(Entity, self).__init__(all_sprites, block_group, *dop_group)
+        self.frame = tile_images[block_type]
+        self.image = self.frame[0]
+        self.station = station
+        self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.xp = None
+        self.x = x
+        self.biom = biom
+        self.y = y
+        self.cur_frame = 0
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frame)
+        self.image = self.frame[self.cur_frame]
+
+    def __str__(self):
+        if self.xp is None:
+            return self.station + self.biom
+        else:
+            return self.station + self.biom + str(self.xp)
+
+    def get_cords(self):
+        return self.x, self.y
+
+
 class Wall(Block):
     def __init__(self, var, pos_x, pos_y, x, y, xp):
         super().__init__(var + 'sten', pos_x, pos_y, x, y, 's', var, wall_group)
         self.xp = xp
 
 
-class Core(Block):
+class Core(AnimatedBlock):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
         super().__init__('yad', pos_x, pos_y, x, y, 'y', biom, ust_block)
         self.xp = xp
@@ -166,10 +199,11 @@ class Turel(Block):
         self.damage = 10
 
 
-class Mine(Block):
+class Mine(AnimatedBlock):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
         super().__init__('mine', pos_x, pos_y, x, y, 'm', biom, mine_group, ust_block)
         self.xp = xp
+
 
 
 class Wall_Ust(Block):
@@ -228,7 +262,7 @@ class Bot(MoveableEntity):
         self.flag = True
         self.smes_x = 0
         self.smes_y = 0
-        self.radius = 5 * TILE_WIDTH
+        self.radius = 6 * TILE_WIDTH
         self.damage = 60
 
     def z_rect(self, x, y):
@@ -328,13 +362,15 @@ class GeneratePlay:
         elif ind == 1:
             return 1 if color > 0.6 else 0
         else:
-            return 1 if color > 0 else 0
+            return 1 if color > 0.2 else 2 if color > -0.2 else 0
 
     def enterprited(self, n, x, y, var):
         if var == 0:
             var = 'v1'
         elif var == 1:
             var = 'v2'
+        if var == 2:
+            var = 'v3'
         if n == 128:
             return Block(var + 'fon', x, y, x, y, 'f', var)
         elif n == 170:
@@ -397,7 +433,7 @@ class Game:
             self.board.remove(Core(self.x, self.y, self.x, self.y, 1000, self.board.board[self.y][self.x].biom), self.x,
                               self.y)
             self.board_pole = self.board.board
-            self.rud = 300
+            self.rud = 30000
             self.time = 0
         else:
             self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
@@ -430,6 +466,10 @@ class Game:
         self.intro_rect2 = self.string_text2.get_rect()
         self.intro_rect2.x = 50
         self.intro_rect2.y = 290
+        self.string_text8 = self.font.render('FPS:', True, pygame.Color('black'))
+        self.intro_rect8 = self.string_text1.get_rect()
+        self.intro_rect8.x = 10
+        self.intro_rect8.y = 150
         self.rud_image = tile_images['alm']
         self.bur_magaz_image = pygame.transform.scale(tile_images['bur_m'], (40, 40))
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
@@ -443,14 +483,11 @@ class Game:
         self.obn = 0
         self.sec = 0 + self.time % 60
         self.min = 0 + self.time // 60
-        attaks = None
-        curl = None
-        curli = None
+        attaks = []
+        curl = []
         collided_sprites = None
         while running:
             v = True
-            attaks = []
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
@@ -481,7 +518,8 @@ class Game:
             self.camera.update(self.player)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
-            curl = []
+                if isinstance(sprite, AnimatedBlock) and self.obn % 5 == 0:
+                    sprite.update()
             collided_sprites = pygame.sprite.groupcollide(bots_group, wall_group, False,
                                                           False)
             z_bots = collided_sprites.keys()
@@ -492,7 +530,6 @@ class Game:
                     collided_sprite_ust[0].xp -= collided_sprite_bot.damage
                     if collided_sprite_ust[0].xp <= 0:
                         x, y = collided_sprite_ust[0].x, collided_sprite_ust[0].y
-                        rect = collided_sprite_ust[0].rect
                         collided_sprite_ust[0].kill()
                         collided_sprite_bot.flag = True
                         if random.randint(0, 10) == 0:
@@ -506,7 +543,10 @@ class Game:
                                                           x + KRAY - self.player.cords[0] - 0.2,
                                                           y + KRAY - self.player.cords[1] - 0.2, x,
                                                           y, 'f', self.board_pole[y][x].biom)
-                        self.board_pole[y][x].rect = rect
+                        if self.board_pole[y][x].rect.x < 0:
+                            self.board_pole[y][x].rect.x -= 1
+                        if self.board_pole[y][x].rect.y < 0:
+                            self.board_pole[y][x].rect.y -= 1
             collided_sprites = pygame.sprite.groupcollide(bots_group, ust_block, False,
                                                           False, collided=circle_collision)
             for collided_sprite_bot, collided_sprite_ust in collided_sprites.items():
@@ -519,11 +559,10 @@ class Game:
                             x, y = collided_sprite_ust[0].x, collided_sprite_ust[0].y
                             rect = collided_sprite_ust[0].rect
                             collided_sprite_ust[0].kill()
+                            collided_sprite_bot.flag = True
                             if self.y == y and self.x == x:
                                 self.end()
                                 running = False
-                            elif x != -1 and y != -1:
-                                collided_sprite_bot.flag = True
                             if isinstance(self.board_pole[y][x], Mine):
                                 self.col_bur -= 1
                             if random.randint(0, 10) == 0:
@@ -538,7 +577,6 @@ class Game:
                                                               y + KRAY - self.player.cords[1] - 0.2, x,
                                                               y, 'f', self.board_pole[y][x].biom)
                             self.board_pole[y][x].rect = rect
-
             for sprite in v_group:
                 if isinstance(sprite, Bot):
                     if self.obn == 50:
@@ -578,13 +616,14 @@ class Game:
                 pygame.draw.aaline(screen_map, 'red', i[0], i[1], 4)
             for i in attaks:
                 pygame.draw.aaline(screen_map, 'green', i[0], i[1], 2)
-            self.update_screen_info()
+            attaks.clear()
+            curl.clear()
+            self.update_screen_info(clock.get_fps())
             screen.blit(screen_map, (0, 0))
             screen.blit(screen_info, (WIDTH_MAP, 0))
             pygame.display.flip()
             self.obn += 1
             clock.tick(FPS)
-            print(sys.getsizeof(collided_sprites))
 
     def add(self, xp):
         x, y = self.spawn_cord()
@@ -608,7 +647,7 @@ class Game:
         else:
             pos = pos[0] // TILE_WIDTH + self.player.cords[0] - KRAY, \
                   pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY
-            print(pos, self.board_pole[pos[1]][pos[0]].station)
+            print(pos, self.board_pole[pos[1]][pos[0]].station, self.board_pole[pos[1]][pos[0]].rect)
             if self.rud >= 50 and self.position == 'bur' and \
                     (self.board_pole[pos[1]][pos[0]].station == 'm' or self.board_pole[pos[1]][pos[0]].station == 'r'):
                 self.rud -= 50
@@ -644,7 +683,7 @@ class Game:
                                                             pos[1] + KRAY - self.player.cords[1] - 0.2, pos[0], pos[1],
                                                             'f', self.board_pole[pos[1]][pos[0]].biom)
 
-    def update_screen_info(self):
+    def update_screen_info(self, fps):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
         pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
         string_text3 = self.font.render('-  ' + str(self.rud), True, pygame.Color('black'))
@@ -660,13 +699,19 @@ class Game:
         intro_rect6 = string_text6.get_rect()
         intro_rect6.x = 150
         intro_rect6.y = 120
+        string_text9 = self.font.render(f' {round(fps, 2)}', True, pygame.Color('black'))
+        intro_rect9 = string_text6.get_rect()
+        intro_rect9.x = 150
+        intro_rect9.y = 150
         screen_info.blit(self.string_text1, self.intro_rect1)
         screen_info.blit(self.string_text2, self.intro_rect2)
         screen_info.blit(self.string_text4, self.intro_rect4)
         screen_info.blit(string_text3, intro_rect3)
         screen_info.blit(string_text5, intro_rect5)
         screen_info.blit(string_text6, intro_rect6)
+        screen_info.blit(string_text9, intro_rect9)
         screen_info.blit(self.string_text7, self.intro_rect7)
+        screen_info.blit(self.string_text8, self.intro_rect8)
         screen_info.blit(self.rud_image, (10, 40))
         screen_info.blit(self.bur_magaz_image, (10, 330))
         screen_info.blit(self.turel_magaz_image, (60, 330))
