@@ -109,9 +109,9 @@ tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_W
                'v3fon': pygame.transform.scale(load_image('v3/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
                'v3sten': pygame.transform.scale(load_image('v3/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
                'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'yad': [pygame.transform.scale(load_image(f'yadro/Layer 1_sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
-                                              (TILE_WIDTH, TILE_WIDTH)) for i in range(1, 19)],
-               'ur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
+               'yad': [pygame.transform.scale(load_image(f'yadro/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
+                                              (TILE_WIDTH, TILE_WIDTH)) for i in range(18)],
+               'bur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'alm': load_image('almaz.png'),
                'mine': [pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
                                                (TILE_WIDTH, TILE_WIDTH)) for i in range(25)],
@@ -205,7 +205,6 @@ class Mine(AnimatedBlock):
         self.xp = xp
 
 
-
 class Wall_Ust(Block):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
         super().__init__('wal2', pos_x, pos_y, x, y, 'w', biom, wall_ust_group, ust_block)
@@ -253,7 +252,7 @@ class Bot(MoveableEntity):
         self.y_p = y_p
         self.yadroy = yy
         self.yadrox = yx
-        self.attak = 30
+        self.attak = 60
         self.delta_x = - self.x_p + self.yadrox
         self.delta_y = - self.y_p + self.yadroy
         self.xp = xp
@@ -425,7 +424,7 @@ class Game:
         self.col_bur = 0
         if flag:
             self.key = random.randint(0, 100000000)
-            SIZE_MAP = random.randint(100, 400), random.randint(100, 400)
+            SIZE_MAP = random.randint(50, 300), random.randint(50, 300)
             # SIZE_MAP = (60, 60)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
@@ -433,7 +432,7 @@ class Game:
             self.board.remove(Core(self.x, self.y, self.x, self.y, 1000, self.board.board[self.y][self.x].biom), self.x,
                               self.y)
             self.board_pole = self.board.board
-            self.rud = 30000
+            self.rud = 300
             self.time = 0
         else:
             self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
@@ -488,6 +487,7 @@ class Game:
         collided_sprites = None
         while running:
             v = True
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
@@ -518,7 +518,7 @@ class Game:
             self.camera.update(self.player)
             for sprite in all_sprites:
                 self.camera.apply(sprite)
-                if isinstance(sprite, AnimatedBlock) and self.obn % 5 == 0:
+                if isinstance(sprite, AnimatedBlock) and self.obn % 10 == 0:
                     sprite.update()
             collided_sprites = pygame.sprite.groupcollide(bots_group, wall_group, False,
                                                           False)
@@ -627,13 +627,14 @@ class Game:
 
     def add(self, xp):
         x, y = self.spawn_cord()
-        bot = Bot(x, y, self.x, self.y, (xp + 1) * 15)
+        bot = Bot(x, y, self.x, self.y, (xp + 1) * 35)
         bot.z_rect(self.player.cords[0], self.player.cords[1])
 
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
 
     def click(self, pos):
+        pos = pos[0] + 0.2 * TILE_WIDTH, pos[1] + 0.2 * TILE_WIDTH
         if pos[0] > WIDTH_MAP:
             pos = pos[0] - WIDTH_MAP, pos[1]
             if 10 <= pos[0] <= 50 and 330 <= pos[1] <= 370:
@@ -645,9 +646,9 @@ class Game:
             elif 10 <= pos[0] <= 50 and 380 <= pos[1] <= 420:
                 self.position = 'lom'
         else:
-            pos = pos[0] // TILE_WIDTH + self.player.cords[0] - KRAY, \
-                  pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY
-            print(pos, self.board_pole[pos[1]][pos[0]].station, self.board_pole[pos[1]][pos[0]].rect)
+            pos = int(pos[0] // TILE_WIDTH + self.player.cords[0] - KRAY), \
+                  int(pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY)
+            print(pos)
             if self.rud >= 50 and self.position == 'bur' and \
                     (self.board_pole[pos[1]][pos[0]].station == 'm' or self.board_pole[pos[1]][pos[0]].station == 'r'):
                 self.rud -= 50
