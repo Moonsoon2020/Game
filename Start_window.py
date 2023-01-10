@@ -10,6 +10,11 @@ class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('Start_window.ui', self)
+        self.setStyleSheet("""QMainWindow {
+        background-image: url("01012.jpg");
+        background-repeat: no-repeat;
+        background-position: center;
+    }""")
         self.initUI()
 
     def initUI(self):
@@ -18,14 +23,18 @@ class MyWidget(QMainWindow):
         self.Authors.clicked.connect(self.open_authors)
 
     def open_game(self):  ################ я не знаю как открыть игру
-        pass
-
+        self.n_world = New_world()
+        self.hide()
+        self.n_world.show()
     def open_list_best(self):
         self.list_best = ListBest()
+        self.hide()
         self.list_best.show()
+
 
     def open_authors(self):
         self.authors = Authors()
+        self.hide()
         self.authors.show()
 
 
@@ -47,6 +56,8 @@ class ListBest(QMainWindow):
         # conn.close()
 
     def back(self):
+        self.main = MyWidget()
+        self.main.show()
         self.hide()
 
 
@@ -60,6 +71,28 @@ class Authors(QMainWindow):
         self.back_button_1.clicked.connect(self.back1)
 
     def back1(self):
+        self.main = MyWidget()
+        self.main.show()
+        self.hide()
+
+class New_world(QMainWindow): ##########сделать кнопку назад
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('New_world.ui', self)
+        self.setStyleSheet("""QMainWindow {
+                background-image: url("01012.jpg");
+                background-repeat: no-repeat;
+                background-position: center;
+            }""")
+        self.initUI()
+
+    def initUI(self):
+        pass
+        #self.back_button_1.clicked.connect(self.back1)
+
+    def back1(self):
+        self.main = MyWidget()
+        self.main.show()
         self.hide()
 
 
