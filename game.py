@@ -111,7 +111,6 @@ tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_W
                'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
                'yad': [pygame.transform.scale(load_image(f'yadro/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
                                               (TILE_WIDTH, TILE_WIDTH)) for i in range(18)],
-               'bur': pygame.transform.scale(load_image('bur.jpg'), (TILE_WIDTH, TILE_WIDTH)),
                'alm': load_image('almaz.png'),
                'mine': [pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
                                                (TILE_WIDTH, TILE_WIDTH)) for i in range(25)],
