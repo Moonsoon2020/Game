@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>941</width>
-    <height>600</height>
+    <width>1076</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="name_text">
    <property name="geometry">
     <rect>
      <x>50</x>
@@ -26,7 +26,7 @@
     <string>Название:</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit">
+  <widget class="QTextEdit" name="name_label">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -36,20 +36,20 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="accidentally_name_btn">
    <property name="geometry">
     <rect>
      <x>240</x>
      <y>40</y>
-     <width>41</width>
+     <width>71</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>PushButton</string>
+    <string>Случайно</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="key_text">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -62,17 +62,17 @@
     <string>Ключ генерации:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="accidentally_key_btn">
    <property name="geometry">
     <rect>
      <x>240</x>
      <y>80</y>
-     <width>41</width>
+     <width>71</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>PushButton</string>
+    <string>Случайно</string>
    </property>
   </widget>
   <widget class="QTextEdit" name="textEdit_2">
@@ -85,7 +85,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButton">
+  <widget class="QRadioButton" name="radioButton_litlle">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -94,11 +94,15 @@
      <height>17</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(120, 255, 99);
+</string>
+   </property>
    <property name="text">
     <string>Маленький</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButton_2">
+  <widget class="QRadioButton" name="radioButton_average">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -107,11 +111,14 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 153, 70);</string>
+   </property>
    <property name="text">
     <string>Средний </string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButton_3">
+  <widget class="QRadioButton" name="radioButton_big">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -119,6 +126,9 @@
      <width>71</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 42, 63);</string>
    </property>
    <property name="text">
     <string>Большой</string>
@@ -134,17 +144,18 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(177, 204, 204, 0);</string>
+    <string notr="true">font: 22pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
    </property>
    <property name="html">
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:22pt; font-weight:600;&quot;&gt;Выберите тип мира&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Berlin Sans FB'; font-size:22pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-weight:600;&quot;&gt;Выберите тип мира&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="create_btn">
    <property name="geometry">
     <rect>
      <x>330</x>
@@ -153,11 +164,15 @@ p, li { white-space: pre-wrap; }
      <height>101</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 22pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
+   </property>
    <property name="text">
     <string>Создать</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="label_error">
    <property name="geometry">
     <rect>
      <x>360</x>
@@ -168,6 +183,23 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>уацац</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="back_button">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>590</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 22pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
+   </property>
+   <property name="text">
+    <string>Назад</string>
    </property>
   </widget>
  </widget>
