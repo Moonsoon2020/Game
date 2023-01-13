@@ -1,8 +1,6 @@
-import random
 import pygame
 import os
 from PerlinNoise import *
-import PIL.Image
 from ContolBD import ControlDataBase
 import sys
 import time
@@ -126,7 +124,7 @@ tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_W
                'bur_m': load_image('bur_magaz.jpg'),
                'tur': pygame.transform.scale(load_image('turel.png'), (TILE_WIDTH, TILE_WIDTH)),
                'turel_m': load_image('turel.png'),
-               'wal': load_image('wal.png'),
+               'wal': pygame.transform.scale(load_image('wal.png'), (40, 40)),
                'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
                'mar': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
                'bur_for_magaz_no_ustan': pygame.transform.scale(load_image('bur_magaz_no_ustanovka.png'), (40, 40))}
@@ -288,7 +286,7 @@ class Bot(MoveableEntity):
         self.flag = True
         self.smes_x = 0
         self.smes_y = 0
-        self.radius = 6 * TILE_WIDTH
+        self.radius = 7 * TILE_WIDTH
         self.damage = 60
 
     # Расчёт стартового положения
@@ -500,26 +498,26 @@ class Game:
         self.intro_rect_res_comlex = self.string_text_res_comlex.get_rect()
         self.intro_rect_res_comlex.x = 60
         self.intro_rect_res_comlex.y = 10
-        self.string_text4 = self.font.render('Координаты:', True, pygame.Color('black'))
-        self.intro_rect4 = self.string_text_res_comlex.get_rect()
-        self.intro_rect4.x = 10
-        self.intro_rect4.y = 90
-        self.string_text7 = self.font.render('Время:', True, pygame.Color('black'))
-        self.intro_rect7 = self.string_text_res_comlex.get_rect()
-        self.intro_rect7.x = 10
-        self.intro_rect7.y = 120
-        self.string_text2 = self.font.render('Постройки Комплекса', True, pygame.Color('black'))
-        self.intro_rect2 = self.string_text2.get_rect()
-        self.intro_rect2.x = 50
-        self.intro_rect2.y = 290
-        self.string_text8 = self.font.render('FPS:', True, pygame.Color('black'))
-        self.intro_rect8 = self.string_text_res_comlex.get_rect()
-        self.intro_rect8.x = 10
-        self.intro_rect8.y = 150
-        self.string_text10 = self.font.render('Выйти', True, pygame.Color('black'))
-        self.intro_rect10 = self.string_text10.get_rect()
-        self.intro_rect10.x = 230
-        self.intro_rect10.y = 670
+        self.string_text_cords = self.font.render('Координаты:', True, pygame.Color('black'))
+        self.intro_rect_cords = self.string_text_cords.get_rect()
+        self.intro_rect_cords.x = 10
+        self.intro_rect_cords.y = 90
+        self.string_text_time = self.font.render('Время:', True, pygame.Color('black'))
+        self.intro_rect_time = self.string_text_time.get_rect()
+        self.intro_rect_time.x = 10
+        self.intro_rect_time.y = 120
+        self.string_text_build_complex = self.font.render('Постройки Комплекса', True, pygame.Color('black'))
+        self.intro_rect_build_complex = self.string_text_build_complex.get_rect()
+        self.intro_rect_build_complex.x = 50
+        self.intro_rect_build_complex.y = 290
+        self.string_text_fps = self.font.render('FPS:', True, pygame.Color('black'))
+        self.intro_rect_fps = self.string_text_fps.get_rect()
+        self.intro_rect_fps.x = 10
+        self.intro_rect_fps.y = 150
+        self.string_text_exit = self.font.render('Выйти', True, pygame.Color('black'))
+        self.intro_rect_exit = self.string_text_exit.get_rect()
+        self.intro_rect_exit.x = 230
+        self.intro_rect_exit.y = 670
         self.rud_image = tile_images['alm']
         self.bur_magaz_image = pygame.transform.scale(tile_images['bur_m'], (40, 40))
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
@@ -756,33 +754,33 @@ class Game:
     def update_screen_info(self, fps):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
         pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
-        string_text3 = self.font.render('-  ' + str(self.rud), True, pygame.Color('black'))
-        intro_rect3 = string_text3.get_rect()
-        intro_rect3.x = 60
-        intro_rect3.y = 50
-        string_text5 = self.font.render(f' {self.player.cords[0] - KRAY} {self.player.cords[1] - KRAY}', True,
-                                        pygame.Color('black'))
-        intro_rect5 = string_text5.get_rect()
-        intro_rect5.x = 150
-        intro_rect5.y = 90
-        string_text6 = self.font.render(f' {self.min} {self.sec}', True, pygame.Color('black'))
-        intro_rect6 = string_text6.get_rect()
-        intro_rect6.x = 150
-        intro_rect6.y = 120
-        string_text9 = self.font.render(f' {round(fps, 2)}', True, pygame.Color('black'))
-        intro_rect9 = string_text6.get_rect()
-        intro_rect9.x = 150
-        intro_rect9.y = 150
+        string_text_rud = self.font.render('-  ' + str(self.rud), True, pygame.Color('black'))
+        intro_rect_rud = string_text_rud.get_rect()
+        intro_rect_rud.x = 60
+        intro_rect_rud.y = 50
+        string_text_cord = self.font.render(f' {self.player.cords[0] - KRAY} {self.player.cords[1] - KRAY}', True,
+                                            pygame.Color('black'))
+        intro_rect_cord = string_text_cord.get_rect()
+        intro_rect_cord.x = 150
+        intro_rect_cord.y = 90
+        string_text_time = self.font.render(f' {self.min} {self.sec}', True, pygame.Color('black'))
+        intro_rect_time = string_text_time.get_rect()
+        intro_rect_time.x = 150
+        intro_rect_time.y = 120
+        string_text_fps = self.font.render(f' {round(fps, 2)}', True, pygame.Color('black'))
+        intro_rect_fps = string_text_fps.get_rect()
+        intro_rect_fps.x = 150
+        intro_rect_fps.y = 150
         screen_info.blit(self.string_text_res_comlex, self.intro_rect_res_comlex)
-        screen_info.blit(self.string_text2, self.intro_rect2)
-        screen_info.blit(self.string_text4, self.intro_rect4)
-        screen_info.blit(string_text3, intro_rect3)
-        screen_info.blit(string_text5, intro_rect5)
-        screen_info.blit(string_text6, intro_rect6)
-        screen_info.blit(string_text9, intro_rect9)
-        screen_info.blit(self.string_text10, self.intro_rect10)
-        screen_info.blit(self.string_text7, self.intro_rect7)
-        screen_info.blit(self.string_text8, self.intro_rect8)
+        screen_info.blit(self.string_text_build_complex, self.intro_rect_build_complex)
+        screen_info.blit(self.string_text_cords, self.intro_rect_cords)
+        screen_info.blit(string_text_rud, intro_rect_rud)
+        screen_info.blit(string_text_cord, intro_rect_cord)
+        screen_info.blit(string_text_time, intro_rect_time)
+        screen_info.blit(string_text_fps, intro_rect_fps)
+        screen_info.blit(self.string_text_exit, self.intro_rect_exit)
+        screen_info.blit(self.string_text_time, self.intro_rect_time)
+        screen_info.blit(self.string_text_fps, self.intro_rect_fps)
         screen_info.blit(self.rud_image, (10, 40))
         screen_info.blit(self.bur_magaz_image, (10, 330))
         screen_info.blit(self.turel_magaz_image, (60, 330))
@@ -817,7 +815,7 @@ class Game:
             return self.spawn_cord()
         return x, y
 
-    # Сохранение файлов
+    """Сохранение файлов"""
     def close(self):
         id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
                                           self.key, self.x, self.y, self.rud)
@@ -832,4 +830,3 @@ class Game:
             if i.xp > 0:
                 print(i, file=f)
         f.close()
-
