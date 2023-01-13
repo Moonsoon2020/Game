@@ -8,6 +8,7 @@ import sys
 import time
 from pygame.math import Vector2
 
+# Константы
 FPS = 50
 WIDTH_MAP = HEIGHT = 700
 WIDTH = WIDTH_MAP + 300
@@ -40,6 +41,8 @@ screen_map = pygame.Surface((WIDTH_MAP, HEIGHT))
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
+# Загрузка изображений
+
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     try:
@@ -58,12 +61,14 @@ def load_image(name, color_key=None):
     return image
 
 
-def perep0(name, x, y):
+# Раскодирование файла карты
+
+def open_file_map(name, x, y):
     var = name[1:3]
     if name[0] == 'f':  # фон
         return Block(var + 'fon', x, y, x, y, 'f', var)
     elif name[0] == 'r':  # руда
-        return Block(var + 'rud', x, y, x, y, 'r',  var, rud_group)
+        return Block(var + 'rud', x, y, x, y, 'r', var, rud_group)
     elif name[0] == 's':  # стена
         return Wall(var, x, y, x, y, int(name[3:]))
     elif name[0] == 'y':  # ядро
@@ -76,11 +81,14 @@ def perep0(name, x, y):
         return Wall_Ust(x, y, x, y, int(name[3:]), var)
 
 
-def perep1(name, x0, y0):
+# Раскодирование файла с ботами
+def open_file_bots(name, x0, y0):
     bot = Bot(float(name[name.index('#') + 1:name.index(':')]), float(name[name.index(':') + 1:]),
-               x0, y0, int(name[:name.index('#')]))
+              x0, y0, int(name[:name.index('#')]))
     bot.z_rect(x0, y0)
 
+
+# Загрузка уровня
 
 def load_level(filename, x, y):
     ControlDataBase().del_world(filename)
@@ -88,17 +96,18 @@ def load_level(filename, x, y):
     with open(filename0, 'r') as mapFile:
         level_map = [line.split() for line in mapFile]
 
-    board0 = [[perep0(level_map[i][j], j, i) for j in range(len(level_map[i]))] for i in range(len(level_map))]
+    board0 = [[open_file_map(level_map[i][j], j, i) for j in range(len(level_map[i]))] for i in range(len(level_map))]
     os.remove(filename0)
     filename1 = "map/" + filename + 'play.txt'
     with open(filename1, 'r') as mapFile:
         level_map = [line for line in mapFile]
 
-    [perep1(level_map[i], x, y) for i in range(len(level_map))]
+    [open_file_bots(level_map[i], x, y) for i in range(len(level_map))]
     os.remove(filename1)
     return board0
 
 
+# Загрузка всех изображений
 tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
                'v1fon': pygame.transform.scale(load_image('v1/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
                'v1sten': pygame.transform.scale(load_image('v1/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
@@ -109,10 +118,10 @@ tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_W
                'v3fon': pygame.transform.scale(load_image('v3/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
                'v3sten': pygame.transform.scale(load_image('v3/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
                'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'yad': [pygame.transform.scale(load_image(f'yadro/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
+               'yad': [pygame.transform.scale(load_image(f'yadro/sprite_{str(i) if i >= 10 else "0" + str(i)}.png'),
                                               (TILE_WIDTH, TILE_WIDTH)) for i in range(18)],
                'alm': load_image('almaz.png'),
-               'mine': [pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >=10 else "0" + str(i)}.png'),
+               'mine': [pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >= 10 else "0" + str(i)}.png'),
                                                (TILE_WIDTH, TILE_WIDTH)) for i in range(25)],
                'bur_m': load_image('bur_magaz.jpg'),
                'tur': pygame.transform.scale(load_image('turel.png'), (TILE_WIDTH, TILE_WIDTH)),
@@ -123,11 +132,13 @@ tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_W
                'bur_for_magaz_no_ustan': pygame.transform.scale(load_image('bur_magaz_no_ustanovka.png'), (40, 40))}
 
 
+# Любой объект на поле
 class Entity(pygame.sprite.Sprite):
     def __init__(self, *alls):
         super().__init__(*alls)
 
 
+# Простые блоки на поле
 class Block(Entity):
     def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
         super(Block, self).__init__(all_sprites, block_group, dop_group)
@@ -140,16 +151,19 @@ class Block(Entity):
         self.biom = biom
         self.y = y
 
+    # Получение данных о блоке для сохранения в файл
     def __str__(self):
         if self.xp is None:
             return self.station + self.biom
         else:
             return self.station + self.biom + str(self.xp)
 
+    # Получение координат блока
     def get_cords(self):
         return self.x, self.y
 
 
+# Анимированные блоки на поле
 class AnimatedBlock(Entity):
     def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
         super(Entity, self).__init__(all_sprites, block_group, *dop_group)
@@ -164,31 +178,38 @@ class AnimatedBlock(Entity):
         self.y = y
         self.cur_frame = 0
 
+    # Изменение прорисовки изображения
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frame)
         self.image = self.frame[self.cur_frame]
 
+    # Получение данных о блоке для сохранения в файл
     def __str__(self):
         if self.xp is None:
             return self.station + self.biom
         else:
             return self.station + self.biom + str(self.xp)
 
+    # Получение координат блока
     def get_cords(self):
         return self.x, self.y
 
 
+# Стена, которая спавнится игрой
 class Wall(Block):
     def __init__(self, var, pos_x, pos_y, x, y, xp):
         super().__init__(var + 'sten', pos_x, pos_y, x, y, 's', var, wall_group)
         self.xp = xp
 
 
+# Ядро - главный центр
 class Core(AnimatedBlock):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
         super().__init__('yad', pos_x, pos_y, x, y, 'y', biom, ust_block)
         self.xp = xp
 
+
+# Турель
 
 class Turel(Block):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
@@ -198,18 +219,22 @@ class Turel(Block):
         self.damage = 10
 
 
+# Бур
+
 class Mine(AnimatedBlock):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
         super().__init__('mine', pos_x, pos_y, x, y, 'm', biom, mine_group, ust_block)
         self.xp = xp
 
 
+# Стены, которые устанавливает персонаж
 class Wall_Ust(Block):
     def __init__(self, pos_x, pos_y, x, y, xp, biom):
         super().__init__('wal2', pos_x, pos_y, x, y, 'w', biom, wall_ust_group, ust_block)
         self.xp = xp
 
 
+# Объекты, которые могут двигаться самостоятельно
 class MoveableEntity(Entity):
     def __init__(self, moveable_entity_group, pos_x, pos_y):
         super(MoveableEntity, self).__init__(moveable_entity_group, v_group)
@@ -217,6 +242,7 @@ class MoveableEntity(Entity):
         self.mask = None
         self.rect = None
 
+    # Изменение координаты по x проверка, что не влетели в стену
     def remove_cord_ox(self, step):
         self.rect.x += step
         for i in wall_group:
@@ -226,6 +252,7 @@ class MoveableEntity(Entity):
         self.rect.x -= step
         return True
 
+    # Изменение координаты по y проверка, что не влетели в стену
     def remove_cord_oy(self, step):
         self.rect.y += step
         for i in wall_group:
@@ -236,6 +263,7 @@ class MoveableEntity(Entity):
         return True
 
 
+# Объект Бота
 class Bot(MoveableEntity):
     def __init__(self, *args):
         self.image = tile_images['bot']
@@ -263,11 +291,13 @@ class Bot(MoveableEntity):
         self.radius = 6 * TILE_WIDTH
         self.damage = 60
 
+    # Расчёт стартового положения
     def z_rect(self, x, y):
         self.rect = self.image.get_rect(). \
             move(TILE_WIDTH * (self.x_p - x + KRAY),
                  TILE_WIDTH * (self.y_p - y + KRAY))
 
+    # Движение ботов
     def movement(self):
         if self.flag:
             self.x_p, self.y_p = [self.x_p + self.step_x, self.y_p + self.step_y]
@@ -277,15 +307,18 @@ class Bot(MoveableEntity):
             self.step_y = min(0.5, self.delta_y / 30)
         self.flag = True
 
+    # Загрука информации для файлов
     def __str__(self):
         return str(self.xp) + '#' + str(float(self.x_p)) + ':' + str(float(self.y_p))
 
 
+# Отключение игры
 def terminate():
     pygame.quit()
     sys.exit()
 
 
+# Игрок
 class Player(MoveableEntity):
     def __init__(self, pos_x, pos_y):
         super(Player, self).__init__(player_group, pos_x, pos_y)
@@ -297,6 +330,7 @@ class Player(MoveableEntity):
         self.x_p = pos_x
         self.y_p = pos_y
 
+    # Изменение координат
     def remove_cord(self, step, paral):
         st = 1 if step > 0 else -1
         if paral == 'ox':
@@ -310,6 +344,7 @@ class Player(MoveableEntity):
                 self.rect.y += step
                 self.y_p += step
 
+    # Возвращение на спавн
     def remove_cord_for_m(self, step_x, step_y):
         self.cords = [self.x, self.y]
         self.x_p = self.x
@@ -318,6 +353,7 @@ class Player(MoveableEntity):
         self.rect.y += step_y
 
 
+# Генерация мира
 class GeneratePlay:
     # создание поля
     def __init__(self, width, height, seed):
@@ -332,28 +368,22 @@ class GeneratePlay:
                         self.noise_biom(i / RES_BIOM, j / RES_BIOM)]
                        for i in range(width)] for j in range(height)]
         board_new = []
-        # значения по умолчанию
-        img = PIL.Image.new('RGB', (width, height))
-        pix = img.load()
         for y in range(height):
             a = []
             for x in range(width):
-                pix[x, y] = int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
-                            int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
-                            int((self.get_color(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)
                 a.append(self.enterprited((int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5) +
                                            int((self.get_color(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5) +
                                            int((self.get_color(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)) // 3, x,
                                           y, int(self.get_color(self.board[y][x][2], 2)))
                          )
             board_new.append(a)
-        img.save("pr3.png")
         self.board = board_new
 
     # 170 руда
     # 212 стены
     # 255 белый
     # 128 серый
+    # Сглаживание и настройка относительно руд и стен
     def get_color(self, color, ind):
         if ind == 0:
             return 1 if color > 0.25 else 0
@@ -361,6 +391,8 @@ class GeneratePlay:
             return 1 if color > 0.6 else 0
         else:
             return 1 if color > 0.2 else 2 if color > -0.2 else 0
+
+    # Настройка и создание относительно биомов
 
     def enterprited(self, n, x, y, var):
         if var == 0:
@@ -376,6 +408,8 @@ class GeneratePlay:
         else:
             return Wall(var, x, y, x, y, 200)
 
+    # Получение координат спавна
+
     def start_cord(self):
         cord = random.randint(int(KOF_START * SIZE_MAP[0]), int(SIZE_MAP[0] * (1 - KOF_START))), \
                random.randint(int(KOF_START * SIZE_MAP[1]), int(SIZE_MAP[1] * (1 - KOF_START)))
@@ -384,10 +418,13 @@ class GeneratePlay:
                    random.randint(int(KOF_START * SIZE_MAP[1]), int(SIZE_MAP[1] * (1 - KOF_START)))
         return cord
 
+    # Изменение клетки в поле
     def remove(self, tile, x, y):
+        self.board[y][x].kill()
         self.board[y][x] = tile
 
 
+# Камера просмотра игрока
 class Camera:
     # зададим начальный сдвиг камеры и размер поля для возможности реализации циклического сдвига
     def __init__(self, x, y):
@@ -399,6 +436,7 @@ class Camera:
         obj.rect.x += self.dx
         obj.rect.y += self.dy
 
+    # сдвиг объектов для ботов
     def apply_bots(self, obj, x, y):
         obj.rect.x = TILE_WIDTH * (obj.x_p - x + KRAY)
         obj.rect.y = TILE_WIDTH * (obj.y_p - y + KRAY)
@@ -410,20 +448,28 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
 
 
+# Проверка на соприкосновение и возможность атаки
 def circle_collision(left, right):
     distance = Vector2(left.rect.center).distance_to(right.rect.center)
     return distance < left.radius
 
 
+# Игра
 class Game:
-    def __init__(self, flag, name):
+    def __init__(self, flag, name, key=-1, size=-1):
         global SIZE_MAP
         self.name = name
         self.controlDB = ControlDataBase()
         self.col_bur = 0
         if flag:
-            self.key = random.randint(0, 100000000)
-            SIZE_MAP = random.randint(50, 300), random.randint(50, 300)
+            self.key = key
+            # Создание размеров относительно введённых запросов
+            if size == 1:
+                SIZE_MAP = random.randint(50, 100), random.randint(50, 100)
+            elif size == 2:
+                SIZE_MAP = random.randint(100, 200), random.randint(100, 200)
+            elif size == 3:
+                SIZE_MAP = random.randint(200, 300), random.randint(200, 300)
             # SIZE_MAP = (60, 60)
             self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
             self.player = Player(*self.board.start_cord())
@@ -431,9 +477,11 @@ class Game:
             self.board.remove(Core(self.x, self.y, self.x, self.y, 1000, self.board.board[self.y][self.x].biom), self.x,
                               self.y)
             self.board_pole = self.board.board
+            # Изначально время равно 0, а количество алмазов 300
             self.rud = 300
             self.time = 0
         else:
+            # Загрузка уже существующего мира
             self.id, self.key, self.x, self.y, self.time, self.rud = self.controlDB.get_info_of_name_world(name)
             self.board = load_level(str(self.id), self.x, self.y)
             self.player = Player(self.x, self.y)
@@ -448,16 +496,16 @@ class Game:
         self.position = ''
         print(SIZE_MAP)
         self.font = pygame.font.Font(None, 30)
-        self.string_text1 = self.font.render('Ресурсы Комплекса:', True, pygame.Color('black'))
-        self.intro_rect1 = self.string_text1.get_rect()
-        self.intro_rect1.x = 60
-        self.intro_rect1.y = 10
+        self.string_text_res_comlex = self.font.render('Ресурсы Комплекса:', True, pygame.Color('black'))
+        self.intro_rect_res_comlex = self.string_text_res_comlex.get_rect()
+        self.intro_rect_res_comlex.x = 60
+        self.intro_rect_res_comlex.y = 10
         self.string_text4 = self.font.render('Координаты:', True, pygame.Color('black'))
-        self.intro_rect4 = self.string_text1.get_rect()
+        self.intro_rect4 = self.string_text_res_comlex.get_rect()
         self.intro_rect4.x = 10
         self.intro_rect4.y = 90
         self.string_text7 = self.font.render('Время:', True, pygame.Color('black'))
-        self.intro_rect7 = self.string_text1.get_rect()
+        self.intro_rect7 = self.string_text_res_comlex.get_rect()
         self.intro_rect7.x = 10
         self.intro_rect7.y = 120
         self.string_text2 = self.font.render('Постройки Комплекса', True, pygame.Color('black'))
@@ -465,16 +513,20 @@ class Game:
         self.intro_rect2.x = 50
         self.intro_rect2.y = 290
         self.string_text8 = self.font.render('FPS:', True, pygame.Color('black'))
-        self.intro_rect8 = self.string_text1.get_rect()
+        self.intro_rect8 = self.string_text_res_comlex.get_rect()
         self.intro_rect8.x = 10
         self.intro_rect8.y = 150
+        self.string_text10 = self.font.render('Выйти', True, pygame.Color('black'))
+        self.intro_rect10 = self.string_text10.get_rect()
+        self.intro_rect10.x = 230
+        self.intro_rect10.y = 670
         self.rud_image = tile_images['alm']
         self.bur_magaz_image = pygame.transform.scale(tile_images['bur_m'], (40, 40))
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
         self.bur_magaz_image_no_ust = tile_images['bur_for_magaz_no_ustan']
         self.wall_magaz_image = tile_images['wal']
-        self.play()
 
+    # Процесс игры
     def play(self):
         clock = pygame.time.Clock()
         running = True
@@ -486,17 +538,23 @@ class Game:
         collided_sprites = None
         while running:
             v = True
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
-                    running = False
+                    terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.click(event.pos)
+                    # Любое нажатие обрабатывается, если нажата кнопка выйти
+                    # файл игры сохранится и будет доступен для доигрывания
+                    if self.click(event.pos):
+                        self.close()
+                        return
                 elif event.type == pygame.KEYDOWN and v:
+                    # Кнопка P автоматическое сохранение
+                    # файл игры сохранится и будет доступен для доигрывания
                     if event.key == pygame.K_p:
                         self.close()
-                        running = False
+                        return
+                    # Движения
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         v = False
                         self.player.remove_cord(-STEP, 'ox')
@@ -511,6 +569,7 @@ class Game:
                         self.player.remove_cord(STEP, 'oy')
                     elif event.key == pygame.K_m:
                         self.restart()
+            # спавн ботов каждые полминуты
             if self.sec % 30 == 1 and self.obn == 1:
                 for i in range(10):
                     self.add(self.min)
@@ -519,6 +578,7 @@ class Game:
                 self.camera.apply(sprite)
                 if isinstance(sprite, AnimatedBlock) and self.obn % 10 == 0:
                     sprite.update()
+            # проверка на столкновения
             collided_sprites = pygame.sprite.groupcollide(bots_group, wall_group, False,
                                                           False)
             z_bots = collided_sprites.keys()
@@ -560,8 +620,7 @@ class Game:
                             collided_sprite_ust[0].kill()
                             collided_sprite_bot.flag = True
                             if self.y == y and self.x == x:
-                                self.end()
-                                running = False
+                                return self.time + int(time.time()) - int(self.timer), self.key
                             if isinstance(self.board_pole[y][x], Mine):
                                 self.col_bur -= 1
                             if random.randint(0, 10) == 0:
@@ -576,6 +635,7 @@ class Game:
                                                               y + KRAY - self.player.cords[1] - 0.2, x,
                                                               y, 'f', self.board_pole[y][x].biom)
                             self.board_pole[y][x].rect = rect
+            # Движение ботов
             for sprite in v_group:
                 if isinstance(sprite, Bot):
                     if self.obn == 50:
@@ -584,12 +644,13 @@ class Game:
                                            self.player.cords[1])
                 else:
                     self.camera.apply(sprite)
-
+            # атака турелей
             collided_sprites = pygame.sprite.groupcollide(turel_group, bots_group, False,
                                                           False, collided=circle_collision)
             for collided_sprite_tur, collided_sprite_bot in collided_sprites.items():
                 if self.rud >= 1:
                     attaks.append([collided_sprite_tur.rect.center, collided_sprite_bot[0].rect.center])
+            # обновления и перерисовки
             if self.obn == 50:
                 # обновлять для экрана
                 self.obn = 0
@@ -624,17 +685,21 @@ class Game:
             self.obn += 1
             clock.tick(FPS)
 
+    # Спавн ботов
     def add(self, xp):
         x, y = self.spawn_cord()
         bot = Bot(x, y, self.x, self.y, (xp + 1) * 35)
         bot.z_rect(self.player.cords[0], self.player.cords[1])
 
+    # Возвращение на точку спавна
     def restart(self):
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
 
+    # Обработка кликов
     def click(self, pos):
         pos = pos[0] + 0.2 * TILE_WIDTH, pos[1] + 0.2 * TILE_WIDTH
         if pos[0] > WIDTH_MAP:
+            # Магазин
             pos = pos[0] - WIDTH_MAP, pos[1]
             if 10 <= pos[0] <= 50 and 330 <= pos[1] <= 370:
                 self.position = 'bur'
@@ -644,7 +709,10 @@ class Game:
                 self.position = 'wal'
             elif 10 <= pos[0] <= 50 and 380 <= pos[1] <= 420:
                 self.position = 'lom'
+            elif 230 <= pos[0] <= 300 and 670 <= pos[1] <= 700:
+                return True
         else:
+            # поле и спавн построек
             pos = int(pos[0] // TILE_WIDTH + self.player.cords[0] - KRAY), \
                   int(pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY)
             print(pos)
@@ -682,7 +750,9 @@ class Game:
                                                             pos[0] + KRAY - self.player.cords[0] - 0.2,
                                                             pos[1] + KRAY - self.player.cords[1] - 0.2, pos[0], pos[1],
                                                             'f', self.board_pole[pos[1]][pos[0]].biom)
+        return False
 
+    # загрузка окна с информацией
     def update_screen_info(self, fps):
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
         pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
@@ -703,13 +773,14 @@ class Game:
         intro_rect9 = string_text6.get_rect()
         intro_rect9.x = 150
         intro_rect9.y = 150
-        screen_info.blit(self.string_text1, self.intro_rect1)
+        screen_info.blit(self.string_text_res_comlex, self.intro_rect_res_comlex)
         screen_info.blit(self.string_text2, self.intro_rect2)
         screen_info.blit(self.string_text4, self.intro_rect4)
         screen_info.blit(string_text3, intro_rect3)
         screen_info.blit(string_text5, intro_rect5)
         screen_info.blit(string_text6, intro_rect6)
         screen_info.blit(string_text9, intro_rect9)
+        screen_info.blit(self.string_text10, self.intro_rect10)
         screen_info.blit(self.string_text7, self.intro_rect7)
         screen_info.blit(self.string_text8, self.intro_rect8)
         screen_info.blit(self.rud_image, (10, 40))
@@ -726,6 +797,7 @@ class Game:
         elif self.position == 'lom':
             pygame.draw.rect(screen_info, (0, 0, 0), (8, 378, 42, 42), 2)
 
+    #  Получение координат спавна для ботов
     def spawn_cord(self):
         z = random.randint(0, 3)
         if z == 0:
@@ -745,6 +817,7 @@ class Game:
             return self.spawn_cord()
         return x, y
 
+    # Сохранение файлов
     def close(self):
         id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
                                           self.key, self.x, self.y, self.rud)
@@ -760,5 +833,3 @@ class Game:
                 print(i, file=f)
         f.close()
 
-    def end(self):
-        pass
