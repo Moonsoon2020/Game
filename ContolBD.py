@@ -38,7 +38,7 @@ class ControlDataBase:
         self.con.commit()
 
     def get_worlds(self):
-        return self.con.cursor().execute(f'SELECT id, name, time, generation_key, x, y FROM OpenWorlds').fetchall()
+        return self.con.cursor().execute(f'SELECT id, name, time, generation_key, x, y, rud FROM OpenWorlds').fetchall()
 
     def get_record(self):
         return self.con.cursor().execute(f'SELECT name, time, generation_key FROM BestPlayers').fetchall()

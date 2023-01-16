@@ -101,6 +101,9 @@
    <property name="text">
     <string>Маленький</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_average">
    <property name="geometry">
@@ -134,27 +137,6 @@
     <string>Большой</string>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="textBrowser">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>120</y>
-     <width>256</width>
-     <height>91</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 22pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
-background-color: rgb(204, 204, 204, 0);</string>
-   </property>
-   <property name="html">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Berlin Sans FB'; font-size:22pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-weight:600;&quot;&gt;Выберите тип мира&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="create_btn">
    <property name="geometry">
     <rect>
@@ -175,14 +157,18 @@ background-color: rgb(204, 204, 204, 0);</string>
   <widget class="QLabel" name="label_error">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>120</y>
-     <width>301</width>
-     <height>221</height>
+     <x>380</x>
+     <y>10</y>
+     <width>671</width>
+     <height>121</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 22pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
+   </property>
    <property name="text">
-    <string>уацац</string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="back_button">
@@ -200,6 +186,23 @@ background-color: rgb(204, 204, 204, 0);</string>
    </property>
    <property name="text">
     <string>Назад</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_v">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>120</y>
+     <width>411</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 22pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
+   </property>
+   <property name="text">
+    <string>Выберите тип мира</string>
    </property>
   </widget>
  </widget>

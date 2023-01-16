@@ -32,14 +32,34 @@ ust_block = pygame.sprite.Group()
 v_group = pygame.sprite.Group()
 bots_group = pygame.sprite.Group()
 
-pygame.init()
-pygame.key.set_repeat(200, 70)
-screen_info = pygame.Surface((WIDTH - WIDTH_MAP, HEIGHT))
-screen_map = pygame.Surface((WIDTH_MAP, HEIGHT))
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+tile_images = None
+screen_info = None
+screen_map = None
+screen = None
 
+def restarted():
+    global all_sprites, block_group, bots_group, player_group, wall_group, rud_group, mine_group, turel_group
+    global wall_ust_group, ust_block, v_group, tile_images, screen, screen_map, screen_info
+
+    all_sprites = pygame.sprite.Group()
+    block_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    wall_group = pygame.sprite.Group()
+    rud_group = pygame.sprite.Group()
+    mine_group = pygame.sprite.Group()
+    turel_group = pygame.sprite.Group()
+    wall_ust_group = pygame.sprite.Group()
+    ust_block = pygame.sprite.Group()
+    v_group = pygame.sprite.Group()
+    bots_group = pygame.sprite.Group()
+
+    tile_images = None
+    screen_info = None
+    screen_map = None
+    screen = None
 
 # Загрузка изображений
+
 
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
@@ -103,31 +123,6 @@ def load_level(filename, x, y):
     [open_file_bots(level_map[i], x, y) for i in range(len(level_map))]
     os.remove(filename1)
     return board0
-
-
-# Загрузка всех изображений
-tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v1fon': pygame.transform.scale(load_image('v1/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v1sten': pygame.transform.scale(load_image('v1/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v2rud': pygame.transform.scale(load_image('v2/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v2fon': pygame.transform.scale(load_image('v2/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v2sten': pygame.transform.scale(load_image('v2/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v3rud': pygame.transform.scale(load_image('v3/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v3fon': pygame.transform.scale(load_image('v3/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'v3sten': pygame.transform.scale(load_image('v3/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'yad': [pygame.transform.scale(load_image(f'yadro/sprite_{str(i) if i >= 10 else "0" + str(i)}.png'),
-                                              (TILE_WIDTH, TILE_WIDTH)) for i in range(18)],
-               'alm': load_image('almaz.png'),
-               'mine': [pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >= 10 else "0" + str(i)}.png'),
-                                               (TILE_WIDTH, TILE_WIDTH)) for i in range(25)],
-               'bur_m': load_image('bur_magaz.jpg'),
-               'tur': pygame.transform.scale(load_image('turel.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'turel_m': load_image('turel.png'),
-               'wal': pygame.transform.scale(load_image('wal.png'), (40, 40)),
-               'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'mar': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
-               'bur_for_magaz_no_ustan': pygame.transform.scale(load_image('bur_magaz_no_ustanovka.png'), (40, 40))}
 
 
 # Любой объект на поле
@@ -313,7 +308,7 @@ class Bot(MoveableEntity):
 # Отключение игры
 def terminate():
     pygame.quit()
-    sys.exit()
+    # sys.exit()
 
 
 # Игрок
@@ -354,10 +349,9 @@ class Player(MoveableEntity):
 # Генерация мира
 class GeneratePlay:
     # создание поля
-    def __init__(self, width, height, seed):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
-        random.seed(seed)
         self.noise_map = PerlinNoiseFactory(2, octaves=1, tile=(width // RES_MAP + 1, height // RES_MAP + 1))
         self.noise_rud = PerlinNoiseFactory(2, octaves=1, tile=(width // RES_RUD + 1, height // RES_RUD + 1))
         self.noise_biom = PerlinNoiseFactory(2, octaves=1, tile=(width // RES_BIOM + 1, height // RES_BIOM + 1))
@@ -452,15 +446,54 @@ def circle_collision(left, right):
     return distance < left.radius
 
 
-# Игра
+
+
+
 class Game:
+    """Игра"""
     def __init__(self, flag, name, key=-1, size=-1):
+        global screen_info, screen_map, screen
+        restarted()
+        screen_info = pygame.Surface((WIDTH - WIDTH_MAP, HEIGHT))
+        screen_map = pygame.Surface((WIDTH_MAP, HEIGHT))
+        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.init()
+        pygame.key.set_repeat(200, 70)
         global SIZE_MAP
         self.name = name
+
         self.controlDB = ControlDataBase()
         self.col_bur = 0
+        global tile_images
+        # Загрузка всех изображений
+        tile_images = {'v1rud': pygame.transform.scale(load_image('v1/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v1fon': pygame.transform.scale(load_image('v1/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v1sten': pygame.transform.scale(load_image('v1/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v2rud': pygame.transform.scale(load_image('v2/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v2fon': pygame.transform.scale(load_image('v2/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v2sten': pygame.transform.scale(load_image('v2/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v3rud': pygame.transform.scale(load_image('v3/rud.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v3fon': pygame.transform.scale(load_image('v3/fon.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'v3sten': pygame.transform.scale(load_image('v3/sten.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'bot': pygame.transform.scale(load_image('bot.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'yad': [
+                           pygame.transform.scale(load_image(f'yadro/sprite_{str(i) if i >= 10 else "0" + str(i)}.png'),
+                                                  (TILE_WIDTH, TILE_WIDTH)) for i in range(18)],
+                       'alm': load_image('almaz.png'),
+                       'mine': [
+                           pygame.transform.scale(load_image(f'bur/sprite_{str(i) if i >= 10 else "0" + str(i)}.png'),
+                                                  (TILE_WIDTH, TILE_WIDTH)) for i in range(25)],
+                       'bur_m': load_image('bur_magaz.jpg'),
+                       'tur': pygame.transform.scale(load_image('turel.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'turel_m': load_image('turel.png'),
+                       'wal': pygame.transform.scale(load_image('wal.png'), (40, 40)),
+                       'wal2': pygame.transform.scale(load_image('wal.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'mar': pygame.transform.scale(load_image('player.png'), (TILE_WIDTH, TILE_WIDTH)),
+                       'bur_for_magaz_no_ustan': pygame.transform.scale(load_image('bur_magaz_no_ustanovka.png'),
+                                                                        (40, 40))}
         if flag:
             self.key = key
+            random.seed(key)
             # Создание размеров относительно введённых запросов
             if size == 1:
                 SIZE_MAP = random.randint(50, 100), random.randint(50, 100)
@@ -469,7 +502,7 @@ class Game:
             elif size == 3:
                 SIZE_MAP = random.randint(200, 300), random.randint(200, 300)
             # SIZE_MAP = (60, 60)
-            self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1], self.key)
+            self.board = GeneratePlay(SIZE_MAP[0], SIZE_MAP[1])
             self.player = Player(*self.board.start_cord())
             self.x, self.y = self.player.x, self.player.y
             self.board.remove(Core(self.x, self.y, self.x, self.y, 1000, self.board.board[self.y][self.x].biom), self.x,
@@ -524,8 +557,10 @@ class Game:
         self.bur_magaz_image_no_ust = tile_images['bur_for_magaz_no_ustan']
         self.wall_magaz_image = tile_images['wal']
 
-    # Процесс игры
+
+
     def play(self):
+        """Процесс игры"""
         clock = pygame.time.Clock()
         running = True
         self.obn = 0
@@ -545,13 +580,13 @@ class Game:
                     # файл игры сохранится и будет доступен для доигрывания
                     if self.click(event.pos):
                         self.close()
-                        return
+                        return []
                 elif event.type == pygame.KEYDOWN and v:
                     # Кнопка P автоматическое сохранение
                     # файл игры сохранится и будет доступен для доигрывания
                     if event.key == pygame.K_p:
                         self.close()
-                        return
+                        return []
                     # Движения
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                         v = False
@@ -618,6 +653,7 @@ class Game:
                             collided_sprite_ust[0].kill()
                             collided_sprite_bot.flag = True
                             if self.y == y and self.x == x:
+                                pygame.quit()
                                 return self.time + int(time.time()) - int(self.timer), self.key
                             if isinstance(self.board_pole[y][x], Mine):
                                 self.col_bur -= 1
@@ -683,18 +719,24 @@ class Game:
             self.obn += 1
             clock.tick(FPS)
 
-    # Спавн ботов
+
+
     def add(self, xp):
+        """Спавн ботов"""
         x, y = self.spawn_cord()
         bot = Bot(x, y, self.x, self.y, (xp + 1) * 35)
         bot.z_rect(self.player.cords[0], self.player.cords[1])
 
-    # Возвращение на точку спавна
+
+
     def restart(self):
+        """Возвращение на точку спавна"""
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
 
-    # Обработка кликов
+
+
     def click(self, pos):
+        """Обработка кликов"""
         pos = pos[0] + 0.2 * TILE_WIDTH, pos[1] + 0.2 * TILE_WIDTH
         if pos[0] > WIDTH_MAP:
             # Магазин
@@ -750,8 +792,10 @@ class Game:
                                                             'f', self.board_pole[pos[1]][pos[0]].biom)
         return False
 
-    # загрузка окна с информацией
+
+
     def update_screen_info(self, fps):
+        """загрузка окна с информацией"""
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
         pygame.draw.rect(screen_info, (0, 0, 0), (0, HEIGHT // 2.5, WIDTH - WIDTH_MAP, 5), 3)
         string_text_rud = self.font.render('-  ' + str(self.rud), True, pygame.Color('black'))
@@ -795,8 +839,10 @@ class Game:
         elif self.position == 'lom':
             pygame.draw.rect(screen_info, (0, 0, 0), (8, 378, 42, 42), 2)
 
-    #  Получение координат спавна для ботов
+
+
     def spawn_cord(self):
+        """Получение координат спавна для ботов"""
         z = random.randint(0, 3)
         if z == 0:
             x, y = random.randint(0, int(KOF_ENEMY * SIZE_MAP[0])) - 1, \
@@ -815,8 +861,10 @@ class Game:
             return self.spawn_cord()
         return x, y
 
-    """Сохранение файлов"""
+
+
     def close(self):
+        """Сохранение файлов"""
         id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
                                           self.key, self.x, self.y, self.rud)
         f = open(f"""map/{id_zap}map.txt""", 'w')
@@ -830,3 +878,4 @@ class Game:
             if i.xp > 0:
                 print(i, file=f)
         f.close()
+        pygame.quit()

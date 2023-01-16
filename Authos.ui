@@ -13,12 +13,12 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="back_button_1">
+  <widget class="QPushButton" name="back_button">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>490</y>
-     <width>121</width>
+     <width>151</width>
      <height>41</height>
     </rect>
    </property>

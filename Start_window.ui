@@ -40,9 +40,9 @@ background-color: rgb(204, 204, 204, 0);</string>
    <widget class="QPushButton" name="Button_best">
     <property name="geometry">
      <rect>
-      <x>850</x>
+      <x>790</x>
       <y>10</y>
-      <width>201</width>
+      <width>261</width>
       <height>81</height>
      </rect>
     </property>
@@ -59,7 +59,7 @@ background-color: rgb(204, 204, 204,0);</string>
      <rect>
       <x>30</x>
       <y>10</y>
-      <width>201</width>
+      <width>261</width>
       <height>81</height>
      </rect>
     </property>
@@ -84,9 +84,9 @@ background-color: rgb(204, 204, 204, 0);
    <widget class="QPushButton" name="dowloand_button">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>380</x>
       <y>440</y>
-      <width>211</width>
+      <width>301</width>
       <height>61</height>
      </rect>
     </property>
