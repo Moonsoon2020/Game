@@ -34,7 +34,7 @@ class Board:
         pix = img.load()
         for x in range(width):
             a = []
-            for y in range(height):
+            for y in range (height):
                 pix[x, y] = int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
                             int((self.getcolor(self.board[y][x][0], 0) + 1) / 2 * 255 + 0.5), \
                             int((self.getcolor(self.board[y][x][1], 1) + 1) / 2 * 255 + 0.5)
