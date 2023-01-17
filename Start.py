@@ -15,7 +15,9 @@ from ContolBD import ControlDataBase
 from game import Game
 
 
-names = ['Лихая туча', 'Отметина ночи']
+names = ['Лихая туча', 'Отметина ночи', 'Грот страха', 'Рой FOGLOFF', 'Континент moon', 'Народ чудес', 'Кратер ужаса',
+         'Багряный дракон', 'Карцер небес', 'Печальный серет', 'Месть FOGLOFF', 'Остров солнца', 'Фронт луны']
+         #'', '', '', '', '', '', '', '', '', '', '']
 
 
 class MyWidget(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):

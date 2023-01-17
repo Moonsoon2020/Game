@@ -37,6 +37,7 @@ screen_info = None
 screen_map = None
 screen = None
 
+
 def restarted():
     global all_sprites, block_group, bots_group, player_group, wall_group, rud_group, mine_group, turel_group
     global wall_ust_group, ust_block, v_group, tile_images, screen, screen_map, screen_info
@@ -779,7 +780,7 @@ class Game:
             elif self.rud >= 30 and self.position == 'lom' and self.board_pole[pos[1]][pos[0]].station == 's':
                 self.rud -= 30
                 self.board_pole[pos[1]][pos[0]].kill()
-                if random.randint(0, 10) == 0:
+                if random.randint(0, 3) == 0:
                     self.board_pole[pos[1]][pos[0]] = Block(self.board_pole[pos[1]][pos[0]].biom + 'rud',
                                                             pos[0] + KRAY - self.player.cords[0] - 0.2,
                                                             pos[1] + KRAY - self.player.cords[1] - 0.2, pos[0], pos[1],
