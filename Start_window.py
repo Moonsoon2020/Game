@@ -66,7 +66,7 @@ class Ui_Flight_Of_The_Clones(object):
 
     def retranslateUi(self, Flight_Of_The_Clones):
         _translate = QtCore.QCoreApplication.translate
-        Flight_Of_The_Clones.setWindowTitle(_translate("Flight_Of_The_Clones", "MainWindow"))
+        Flight_Of_The_Clones.setWindowTitle(_translate("Flight_Of_The_Clones", "Flight_Of_The_Clones"))
         self.Btn_play.setText(_translate("Flight_Of_The_Clones", "Новый мир"))
         self.Button_best.setText(_translate("Flight_Of_The_Clones", "Лучшие игроки"))
         self.Authors.setText(_translate("Flight_Of_The_Clones", "О разработчиках"))

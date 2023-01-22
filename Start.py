@@ -13,14 +13,14 @@ import Old_world
 import end
 from ContolBD import ControlDataBase
 from game import Game
+import pympler
 
 
 names = ['Лихая туча', 'Отметина ночи', 'Грот страха', 'Рой FOGLOFF', 'Континент moon', 'Народ чудес', 'Кратер ужаса',
          'Багряный дракон', 'Карцер небес', 'Печальный серет', 'Месть FOGLOFF', 'Остров солнца', 'Фронт луны']
-         #'', '', '', '', '', '', '', '', '', '', '']
 
 
-class MyWidget(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):
+class StartW(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -38,7 +38,7 @@ class MyWidget(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):
         self.dowloand_button.clicked.connect(self.open_download)
         self.learn_btn.clicked.connect(self.open_learn)
 
-    def open_game(self):  ################ я не знаю как открыть игру
+    def open_game(self):
         self.n_world = New_world_window()
         self.hide()
         self.n_world.show()
@@ -69,25 +69,58 @@ class ListBest(QMainWindow, List_Best.Ui_List_Best):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                        background-image: url("01012.jpg");
-                        background-repeat: no-repeat;
-                        background-position: center;
-                    }""")
+                background-image: url("01012.jpg");
+                background-repeat: no-repeat;
+                background-position: center;
+            }""")
         self.initUI()
 
     def initUI(self):
         self.back_button.clicked.connect(self.back)
-        # conn = sqlite3.connect('какая-то дб ')
-        # self.textBrowser_best_pl.setFont(QFont('Arial', 24))
-        # cursor = conn.cursor()
-        # result = cursor.execute("""SELECT * FROM best_list""").fetchall()
-        # for title, res, obj in sorted(result, key=lambda x: x[1], reverse=True):
-        #     self.textBrowser_best_pl.append(str(title) + '\t' + str(res) + '\t' + str(obj))
+        self.control = ControlDataBase()
+        self.data = list(sorted(self.control.get_record(), key=lambda x: x[1], reverse=True))
+        print(self.data)
+        self.pushnaz.clicked.connect(self.past)
+        self.pushvper.clicked.connect(self.next)
+        self.station = 0
+        self.push_start = []
+        self.label_info = []
+        for i in range(0, 5):
+            self.label_info.append(QtWidgets.QLabel(self))
+            # self.push_start[-1].close()
+        self.repaint()
+        self.remove()
 
-        # conn.close()
+    def past(self):
+        if self.station - 5 >= 0:
+            self.station -= 5
+            self.remove()
+
+    def next(self):
+        if self.station + 5 <= len(self.data):
+            self.station += 5
+            self.remove()
+
+    def remove(self):
+        print(self.data)
+        for i in range(self.station, self.station + 5):
+            if i >= len(self.data):
+                self.label_info[(i - self.station)].hide()
+            else:
+                self.label_info[(i - self.station)].show()
+                self.label_info[(i - self.station)].setGeometry(
+                    QtCore.QRect(120, 120 + (i - self.station) * 50, 720, 50))
+                self.label_info[(i - self.station)].setText(f"{i + 1}. Игрок \""
+                                                            f"{self.data[i][0] if len(self.data[i][0]) < 10 else str(self.data[i][0][:8]) + ' ...'}\"."
+                                                            f"Уровень {self.data[i][1] // 30 + 1}. Ключ генерации {self.data[i][2]}")
+                self.label_info[(i - self.station)].setObjectName("label_info")
+                self.label_info[(i - self.station)].setStyleSheet("font: 16pt \"Berlin Sans FB\"; color: "
+                                                                  "rgb(175,238,238);\n"
+                                                                  "background-color: rgb(204, 204, 204, 0);")
+        self.repaint()
 
     def back(self):
-        self.main = MyWidget()
+        self.main = StartW()
         self.main.show()
         self.hide()
 
@@ -107,7 +140,7 @@ class Authors(QMainWindow, Authos.Ui_Form):
         self.back_button.clicked.connect(self.back)
 
     def back(self):
-        self.main = MyWidget()
+        self.main = StartW()
         self.main.show()
         self.hide()
 
@@ -132,8 +165,9 @@ class End(QMainWindow, end.Ui_MainWindow):
 
     def zap(self):
         control = ControlDataBase()
-        control.add_record(self.textEdit_name.toPlainText(), self.time, self.key)
-        self.my = MyWidget()
+        control.add_record(self.textEdit_name.toPlainText() if self.textEdit_name.toPlainText() != '' else 'player',
+                           self.time, self.key)
+        self.my = StartW()
         self.my.show()
         self.hide()
 
@@ -184,13 +218,13 @@ class New_world_window(QMainWindow, New_world.Ui_Form):
         info = game.play()
         random.seed(newrandov)
         if len(info) == 0:
-            self.my = MyWidget()
+            self.my = StartW()
         else:
             self.my = End(info[0], info[1])
         self.my.show()
 
     def back(self):
-        self.main = MyWidget()
+        self.main = StartW()
         self.main.show()
         self.hide()
 
@@ -231,7 +265,7 @@ class Old_world_w(QMainWindow, Old_world.Ui_Form):
         info = game.play()
         random.seed(newrandov)
         if len(info) == 0:
-            self.my = MyWidget()
+            self.my = StartW()
         else:
             self.my = End(info[0], info[1])
         self.my.show()
@@ -273,10 +307,8 @@ class Old_world_w(QMainWindow, Old_world.Ui_Form):
                 # self.push_start[-1].close()
         self.repaint()
 
-
-
     def back(self):
-        self.main = MyWidget()
+        self.main = StartW()
         self.main.show()
         self.hide()
 
@@ -296,13 +328,13 @@ class Learn(QMainWindow, Learning.Ui_Form):
         self.back_button.clicked.connect(self.back)
 
     def back(self):
-        self.main = MyWidget()
+        self.main = StartW()
         self.main.show()
         self.hide()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = MyWidget()
+    ex = StartW()
     ex.show()
     sys.exit(app.exec_())

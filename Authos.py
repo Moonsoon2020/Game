@@ -19,9 +19,10 @@ class Ui_Form(object):
         self.back_button.setGeometry(QtCore.QRect(10, 490, 151, 41))
         self.back_button.setStyleSheet("font: 22pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
 "background-color: rgb(204, 204, 204, 0);")
-        self.back_button.setObjectName("back_button_1")
+        self.back_button.setObjectName("back_button")
         self.label = QtWidgets.QLabel(Form)
-        self.label.setGeometry(QtCore.QRect(200, 20, 301, 231))
+        self.label.setGeometry(QtCore.QRect(10, 0, 651, 191))
+        self.label.setStyleSheet("font: 15pt \"Berlin Sans FB\"; color: rgb(175,238,238);\\nbackground-color: rgb(204, 204, 204, 0);")
         self.label.setObjectName("label")
 
         self.retranslateUi(Form)
@@ -31,4 +32,7 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.back_button.setText(_translate("Form", "Назад"))
-        self.label.setText(_translate("Form", "gaeraergaergaergaergaergaerggeerg"))
+        self.label.setText(_translate("Form", "В разработке игры участвовали:\n"
+"Войнов Богдан - главный разработчик,\n"
+"Влад Соков - программист-художник,\n"
+"Софья Брянцева - дизайнер."))

@@ -49,7 +49,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Существующий мир"))
         self.back_button.setText(_translate("Form", "Назад"))
         self.label_zag.setText(_translate("Form", "Выберите мир"))
         self.pushvper.setText(_translate("Form", ">"))

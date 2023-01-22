@@ -5,6 +5,8 @@ from ContolBD import ControlDataBase
 import sys
 import time
 from pygame.math import Vector2
+import cProfile
+from pympler import summary
 
 # Константы
 FPS = 50
@@ -58,6 +60,7 @@ def restarted():
     screen_info = None
     screen_map = None
     screen = None
+
 
 # Загрузка изображений
 
@@ -446,12 +449,19 @@ def circle_collision(left, right):
     distance = Vector2(left.rect.center).distance_to(right.rect.center)
     return distance < left.radius
 
-
-
-
+def profile(func):
+    """Decorator for run function profile"""
+    def wrapper(*args, **kwargs):
+        profile_filename = func.__name__ + '.prof'
+        profiler = cProfile.Profile()
+        result = profiler.runcall(func, *args, **kwargs)
+        profiler.dump_stats(profile_filename)
+        return result
+    return wrapper
 
 class Game:
     """Игра"""
+    @profile
     def __init__(self, flag, name, key=-1, size=-1):
         global screen_info, screen_map, screen
         restarted()
@@ -557,8 +567,7 @@ class Game:
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
         self.bur_magaz_image_no_ust = tile_images['bur_for_magaz_no_ustan']
         self.wall_magaz_image = tile_images['wal']
-
-
+        pygame.display.set_caption('Flight_Of_The_Clones')
 
     def play(self):
         """Процесс игры"""
@@ -567,15 +576,21 @@ class Game:
         self.obn = 0
         self.sec = 0 + self.time % 60
         self.min = 0 + self.time // 60
-        attaks = []
-        curl = []
-        collided_sprites = None
+
+
         while running:
+            attaks = []
+            curl = []
+            z_bots = None
+            collided_sprites = None
             v = True
+            collided_sprite_bot = None
+            collided_sprite_ust = None
+            collided_sprite_tur = None
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
-                    terminate()
+                    return []
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # Любое нажатие обрабатывается, если нажата кнопка выйти
                     # файл игры сохранится и будет доступен для доигрывания
@@ -691,6 +706,8 @@ class Game:
                 self.obn = 0
                 self.rud += self.col_bur
                 self.sec += 1
+                sum1 = summary.summarize(v_group)
+                summary.print_(sum1)
                 for collided_sprite_tur, collided_sprite_bot in collided_sprites.items():
                     collided_sprite_bot = collided_sprite_bot[0]
                     if self.rud >= 1:
@@ -720,21 +737,15 @@ class Game:
             self.obn += 1
             clock.tick(FPS)
 
-
-
     def add(self, xp):
         """Спавн ботов"""
         x, y = self.spawn_cord()
         bot = Bot(x, y, self.x, self.y, (xp + 1) * 35)
         bot.z_rect(self.player.cords[0], self.player.cords[1])
 
-
-
     def restart(self):
         """Возвращение на точку спавна"""
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
-
-
 
     def click(self, pos):
         """Обработка кликов"""
@@ -793,8 +804,6 @@ class Game:
                                                             'f', self.board_pole[pos[1]][pos[0]].biom)
         return False
 
-
-
     def update_screen_info(self, fps):
         """загрузка окна с информацией"""
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
@@ -840,8 +849,6 @@ class Game:
         elif self.position == 'lom':
             pygame.draw.rect(screen_info, (0, 0, 0), (8, 378, 42, 42), 2)
 
-
-
     def spawn_cord(self):
         """Получение координат спавна для ботов"""
         z = random.randint(0, 3)
@@ -862,12 +869,9 @@ class Game:
             return self.spawn_cord()
         return x, y
 
-
-
     def close(self):
         """Сохранение файлов"""
-        id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
-                                          self.key, self.x, self.y, self.rud)
+        id_zap = self.controlDB.add_world(self.name, self.time + self.obn, self.key, self.x, self.y, self.rud)
         f = open(f"""map/{id_zap}map.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
