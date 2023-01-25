@@ -37,7 +37,7 @@ class Ui_List_Best(object):
 
     def retranslateUi(self, List_Best):
         _translate = QtCore.QCoreApplication.translate
-        List_Best.setWindowTitle(_translate("List_Best", "Form"))
+        List_Best.setWindowTitle(_translate("List_Best", "Лучшие игроки"))
         self.back_button.setText(_translate("List_Best", "Назад"))
         self.pushnaz.setText(_translate("List_Best", "<"))
         self.pushvper.setText(_translate("List_Best", ">"))

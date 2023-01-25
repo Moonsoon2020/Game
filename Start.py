@@ -25,7 +25,7 @@ class StartW(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-        background-image: url("01012.jpg");
+        background-image: url("data/fon.jpg");
         background-repeat: no-repeat;
         background-position: center;
     }""")
@@ -69,7 +69,7 @@ class ListBest(QMainWindow, List_Best.Ui_List_Best):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                background-image: url("01012.jpg");
+                background-image: url("data/fon.jpg");
                 background-repeat: no-repeat;
                 background-position: center;
             }""")
@@ -130,7 +130,7 @@ class Authors(QMainWindow, Authos.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                        background-image: url("01012.jpg");
+                        background-image: url("data/fon.jpg");
                         background-repeat: no-repeat;
                         background-position: center;
                     }""")
@@ -150,7 +150,7 @@ class End(QMainWindow, end.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                        background-image: url("01012.jpg");
+                        background-image: url("data/fon.jpg");
                         background-repeat: no-repeat;
                         background-position: center;
                     }""")
@@ -177,7 +177,7 @@ class New_world_window(QMainWindow, New_world.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                background-image: url("01012.jpg");
+                background-image: url("data/fon.jpg");
                 background-repeat: no-repeat;
                 background-position: center;
             }""")
@@ -234,7 +234,7 @@ class Old_world_w(QMainWindow, Old_world.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                background-image: url("01012.jpg");
+                background-image: url("data/fon.jpg");
                 background-repeat: no-repeat;
                 background-position: center;
             }""")
@@ -318,7 +318,7 @@ class Learn(QMainWindow, Learning.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self.setStyleSheet("""QMainWindow {
-                   background-image: url("01012.jpg");
+                   background-image: url("data/fon.jpg");
                    background-repeat: no-repeat;
                    background-position: center;
                }""")
