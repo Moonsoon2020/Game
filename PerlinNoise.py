@@ -29,7 +29,7 @@ class PerlinNoiseFactory(object):
         More octaves create a foggier and more-detailed noise pattern.  More
         than 4 octaves is rather excessive.
         ``tile`` can be used to make a seamlessly tiling pattern.  For example:
-            pnf = PerlinNoiseFactory(2, tile=(0, 3))
+            pnf = PerlinNoiseFactory(v2, tile=(0, 3))
         This will produce noise that tiles every 3 units vertically, but never
         tiles horizontally.
         If ``unbias`` is true, the smoothstep function will be applied to the
@@ -41,7 +41,7 @@ class PerlinNoiseFactory(object):
         self.tile = tile + (0,) * dimension
         self.unbias = unbias
 
-        # For n dimensions, the range of Perlin noise is ±sqrt(n)/2; multiply
+        # For n dimensions, the range of Perlin noise is ±sqrt(n)/v2; multiply
         # by this to scale to ±1
         self.scale_factor = 2 * dimension ** -0.5
 
@@ -133,7 +133,7 @@ class PerlinNoiseFactory(object):
         # Need to scale n back down since adding all those extra octaves has
         # probably expanded it beyond ±1
         # 1 octave: ±1
-        # 2 octaves: ±1½
+        # v2 octaves: ±1½
         # 3 octaves: ±1¾
         ret /= 2 - 2 ** (1 - self.octaves)
 
@@ -159,14 +159,14 @@ class PerlinNoiseFactory(object):
 # frames = 1
 # space_range = size//res
 #
-# pnf = PerlinNoiseFactory(2, octaves=4, tile=(space_range, space_range))
+# pnf = PerlinNoiseFactory(v2, octaves=4, tile=(space_range, space_range))
 #
 # for t in range(frames):
 #     img = PIL.Image.new('RGB', (size, size))
 #     for x in range(size):
 #         for y in range(size):
 #             n = pnf(x/res, y/res)
-#             img.putpixel((x, y), int((n + 1) / 2 * 255 + 0.5))
+#             img.putpixel((x, y), int((n + 1) / v2 * 255 + 0.5))
 #
 #     img.save("noiseframe{:03d}.png".format(t))
 #     print(t)

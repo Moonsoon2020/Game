@@ -17,24 +17,33 @@ class Ui_Form(object):
         Form.resize(1076, 650)
         self.name_text = QtWidgets.QLabel(Form)
         self.name_text.setGeometry(QtCore.QRect(50, 30, 61, 51))
+        self.name_text.setStyleSheet("font: 8pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
+"background-color: rgb(204, 204, 204, 0);")
         self.name_text.setObjectName("name_text")
         self.name_label = QtWidgets.QTextEdit(Form)
-        self.name_label.setGeometry(QtCore.QRect(130, 40, 101, 31))
+        self.name_label.setGeometry(QtCore.QRect(130, 40, 181, 31))
         self.name_label.setObjectName("name_label")
         self.accidentally_name_btn = QtWidgets.QPushButton(Form)
-        self.accidentally_name_btn.setGeometry(QtCore.QRect(240, 40, 71, 31))
+        self.accidentally_name_btn.setGeometry(QtCore.QRect(310, 40, 71, 31))
+        self.accidentally_name_btn.setStyleSheet("font: 8pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
+"background-color: rgb(204, 204, 204, 0);")
         self.accidentally_name_btn.setObjectName("accidentally_name_btn")
         self.key_text = QtWidgets.QLabel(Form)
-        self.key_text.setGeometry(QtCore.QRect(40, 80, 91, 31))
+        self.key_text.setGeometry(QtCore.QRect(20, 80, 111, 31))
+        self.key_text.setStyleSheet("font: 8pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
+"background-color: rgb(204, 204, 204, 0);")
         self.key_text.setObjectName("key_text")
         self.accidentally_key_btn = QtWidgets.QPushButton(Form)
-        self.accidentally_key_btn.setGeometry(QtCore.QRect(240, 80, 71, 31))
+        self.accidentally_key_btn.setGeometry(QtCore.QRect(310, 80, 71, 31))
+        self.accidentally_key_btn.setStyleSheet("font: 8\n"
+"pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
+"background-color: rgb(204, 204, 204, 0);")
         self.accidentally_key_btn.setObjectName("accidentally_key_btn")
         self.textEdit_2 = QtWidgets.QTextEdit(Form)
-        self.textEdit_2.setGeometry(QtCore.QRect(130, 80, 101, 31))
+        self.textEdit_2.setGeometry(QtCore.QRect(130, 80, 181, 31))
         self.textEdit_2.setObjectName("textEdit_2")
         self.radioButton_litlle = QtWidgets.QRadioButton(Form)
-        self.radioButton_litlle.setGeometry(QtCore.QRect(130, 220, 82, 17))
+        self.radioButton_litlle.setGeometry(QtCore.QRect(130, 220, 111, 17))
         self.radioButton_litlle.setStyleSheet("color: rgb(120, 255, 99);\n"
 "")
         self.radioButton_litlle.setChecked(True)
@@ -45,6 +54,13 @@ class Ui_Form(object):
         self.radioButton_average.setObjectName("radioButton_average")
         self.radioButton_big = QtWidgets.QRadioButton(Form)
         self.radioButton_big.setGeometry(QtCore.QRect(130, 250, 71, 31))
+=======
+        self.radioButton_average.setGeometry(QtCore.QRect(130, 237, 111, 20))
+        self.radioButton_average.setStyleSheet("color: rgb(255, 153, 70);")
+        self.radioButton_average.setObjectName("radioButton_average")
+        self.radioButton_big = QtWidgets.QRadioButton(Form)
+        self.radioButton_big.setGeometry(QtCore.QRect(130, 250, 111, 31))
+>>>>>>> feature10
         self.radioButton_big.setStyleSheet("color: rgb(255, 42, 63);")
         self.radioButton_big.setObjectName("radioButton_big")
         self.create_btn = QtWidgets.QPushButton(Form)
@@ -74,7 +90,11 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
+<<<<<<< HEAD
         Form.setWindowTitle(_translate("Form", "Form"))
+=======
+        Form.setWindowTitle(_translate("Form", "Новый мир"))
+>>>>>>> feature10
         self.name_text.setText(_translate("Form", "Название:"))
         self.accidentally_name_btn.setText(_translate("Form", "Случайно"))
         self.key_text.setText(_translate("Form", "Ключ генерации:"))

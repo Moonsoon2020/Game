@@ -22,6 +22,10 @@
      <height>51</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 8pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
+   </property>
    <property name="text">
     <string>Название:</string>
    </property>
@@ -31,7 +35,7 @@
     <rect>
      <x>130</x>
      <y>40</y>
-     <width>101</width>
+     <width>181</width>
      <height>31</height>
     </rect>
    </property>
@@ -39,11 +43,15 @@
   <widget class="QPushButton" name="accidentally_name_btn">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>310</x>
      <y>40</y>
      <width>71</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 8pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
    </property>
    <property name="text">
     <string>Случайно</string>
@@ -52,11 +60,15 @@
   <widget class="QLabel" name="key_text">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>20</x>
      <y>80</y>
-     <width>91</width>
+     <width>111</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 8pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
    </property>
    <property name="text">
     <string>Ключ генерации:</string>
@@ -65,11 +77,16 @@
   <widget class="QPushButton" name="accidentally_key_btn">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>310</x>
      <y>80</y>
      <width>71</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 8
+pt &quot;Berlin Sans FB&quot;; color: rgb(175,238,238);
+background-color: rgb(204, 204, 204, 0);</string>
    </property>
    <property name="text">
     <string>Случайно</string>
@@ -80,7 +97,7 @@
     <rect>
      <x>130</x>
      <y>80</y>
-     <width>101</width>
+     <width>181</width>
      <height>31</height>
     </rect>
    </property>
@@ -90,7 +107,7 @@
     <rect>
      <x>130</x>
      <y>220</y>
-     <width>82</width>
+     <width>111</width>
      <height>17</height>
     </rect>
    </property>
@@ -110,7 +127,7 @@
     <rect>
      <x>130</x>
      <y>237</y>
-     <width>82</width>
+     <width>111</width>
      <height>20</height>
     </rect>
    </property>
@@ -126,7 +143,7 @@
     <rect>
      <x>130</x>
      <y>250</y>
-     <width>71</width>
+     <width>111</width>
      <height>31</height>
     </rect>
    </property>

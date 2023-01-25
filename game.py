@@ -1,7 +1,12 @@
 import pygame
 import os
+from PerlinNoise import *
+from ContolBD import ControlDataBase
 import sys
-import pygame
+import time
+from pygame.math import Vector2
+import cProfile
+from pympler import summary
 
 # Константы
 FPS = 50
@@ -56,9 +61,8 @@ def restarted():
     screen_map = None
     screen = None
 
-# Загрузка изображений
 
-
+# fwefwfwfwfwfwfwfwf
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     try:
@@ -77,109 +81,11 @@ def load_image(name, color_key=None):
     return image
 
 
-# Раскодирование файла карты
-
-def open_file_map(name, x, y):
-    var = name[1:3]
-    if name[0] == 'f':  # фон
-        return Block(var + 'fon', x, y, x, y, 'f', var)
-    elif name[0] == 'r':  # руда
-        return Block(var + 'rud', x, y, x, y, 'r', var, rud_group)
-    elif name[0] == 's':  # стена
-        return Wall(var, x, y, x, y, int(name[3:]))
-    elif name[0] == 'y':  # ядро
-        return Core(x, y, x, y, int(name[3:]), var)
-    elif name[0] == 'm':  # бур
-        return Mine(x, y, x, y, int(name[3:]), var)
-    elif name[0] == 't':  # турель
-        return Turel(x, y, x, y, int(name[3:]), var)
-    elif name[0] == 'w':  # стена само построенная(персом)
-        return Wall_Ust(x, y, x, y, int(name[3:]), var)
-
-
-# Раскодирование файла с ботами
-def open_file_bots(name, x0, y0):
-    bot = Bot(float(name[name.index('#') + 1:name.index(':')]), float(name[name.index(':') + 1:]),
-              x0, y0, int(name[:name.index('#')]))
-    bot.z_rect(x0, y0)
-
-
-# Загрузка уровня
-
-def load_level(filename, x, y):
-    ControlDataBase().del_world(filename)
-    filename0 = "map/" + filename + 'map.txt'
-    with open(filename0, 'r') as mapFile:
-        level_map = [line.split() for line in mapFile]
-
-    board0 = [[open_file_map(level_map[i][j], j, i) for j in range(len(level_map[i]))] for i in range(len(level_map))]
-    os.remove(filename0)
-    filename1 = "map/" + filename + 'play.txt'
-    with open(filename1, 'r') as mapFile:
-        level_map = [line for line in mapFile]
-
-    [open_file_bots(level_map[i], x, y) for i in range(len(level_map))]
-    os.remove(filename1)
-    return board0
-
-
-# Любой объект на поле
-class Entity(pygame.sprite.Sprite):
-    def __init__(self, *alls):
-        super().__init__(*alls)
-
-
-# Простые блоки на поле
-class Block(Entity):
-    def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
-        super(Block, self).__init__(all_sprites, block_group, dop_group)
-        self.image = tile_images[block_type]
-        self.station = station
-        self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
-        self.mask = pygame.mask.from_surface(self.image)
-        self.xp = None
-        self.x = x
-        self.biom = biom
-        self.y = y
-
-    # Получение данных о блоке для сохранения в файл
-    def __str__(self):
-        if self.xp is None:
-            return self.station + self.biom
-        else:
-            return self.station + self.biom + str(self.xp)
-
-    # Получение координат блока
-    def get_cords(self):
-        return self.x, self.y
-
-
-# Анимированные блоки на поле
-class AnimatedBlock(Entity):
-    def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
-        super(Entity, self).__init__(all_sprites, block_group, *dop_group)
-        self.frame = tile_images[block_type]
-        self.image = self.frame[0]
-        self.station = station
-        self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
-        self.mask = pygame.mask.from_surface(self.image)
-        self.xp = None
-        self.x = x
-        self.biom = biom
-        self.y = y
-        self.cur_frame = 0
-
-    # Изменение прорисовки изображения
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frame)
-        self.image = self.frame[self.cur_frame]
-
-    # Получение данных о блоке для сохранения в файл
-    def __str__(self):
-        if self.xp is None:
-            return self.station + self.biom
-        else:
-            return self.station + self.biom + str(self.xp)
+def load_level(filename):
+    filename = "data/" + filename
+    # читаем уровень, убирая символы перевода строки
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
 
     # Получение координат блока
     def get_cords(self):
@@ -443,12 +349,19 @@ def circle_collision(left, right):
     distance = Vector2(left.rect.center).distance_to(right.rect.center)
     return distance < left.radius
 
-
-
-
+def profile(func):
+    """Decorator for run function profile"""
+    def wrapper(*args, **kwargs):
+        profile_filename = func.__name__ + '.prof'
+        profiler = cProfile.Profile()
+        result = profiler.runcall(func, *args, **kwargs)
+        profiler.dump_stats(profile_filename)
+        return result
+    return wrapper
 
 class Game:
     """Игра"""
+    @profile
     def __init__(self, flag, name, key=-1, size=-1):
         global screen_info, screen_map, screen
         restarted()
@@ -554,8 +467,7 @@ class Game:
         self.turel_magaz_image = pygame.transform.scale(tile_images['turel_m'], (40, 40))
         self.bur_magaz_image_no_ust = tile_images['bur_for_magaz_no_ustan']
         self.wall_magaz_image = tile_images['wal']
-
-
+        pygame.display.set_caption('Flight_Of_The_Clones')
 
     def play(self):
         """Процесс игры"""
@@ -564,15 +476,21 @@ class Game:
         self.obn = 0
         self.sec = 0 + self.time % 60
         self.min = 0 + self.time // 60
-        attaks = []
-        curl = []
-        collided_sprites = None
+
+
         while running:
+            attaks = []
+            curl = []
+            z_bots = None
+            collided_sprites = None
             v = True
+            collided_sprite_bot = None
+            collided_sprite_ust = None
+            collided_sprite_tur = None
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
-                    terminate()
+                    return []
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # Любое нажатие обрабатывается, если нажата кнопка выйти
                     # файл игры сохранится и будет доступен для доигрывания
@@ -688,6 +606,8 @@ class Game:
                 self.obn = 0
                 self.rud += self.col_bur
                 self.sec += 1
+                sum1 = summary.summarize(v_group)
+                summary.print_(sum1)
                 for collided_sprite_tur, collided_sprite_bot in collided_sprites.items():
                     collided_sprite_bot = collided_sprite_bot[0]
                     if self.rud >= 1:
@@ -717,21 +637,15 @@ class Game:
             self.obn += 1
             clock.tick(FPS)
 
-
-
     def add(self, xp):
         """Спавн ботов"""
         x, y = self.spawn_cord()
         bot = Bot(x, y, self.x, self.y, (xp + 1) * 35)
         bot.z_rect(self.player.cords[0], self.player.cords[1])
 
-
-
     def restart(self):
         """Возвращение на точку спавна"""
         self.player.remove_cord_for_m(self.x - self.player.x_p, self.y - self.player.y_p)
-
-
 
     def click(self, pos):
         """Обработка кликов"""
@@ -790,8 +704,6 @@ class Game:
                                                             'f', self.board_pole[pos[1]][pos[0]].biom)
         return False
 
-
-
     def update_screen_info(self, fps):
         """загрузка окна с информацией"""
         pygame.draw.rect(screen_info, (0, 0, 0), (0, 0, 5, HEIGHT), 5)
@@ -837,8 +749,6 @@ class Game:
         elif self.position == 'lom':
             pygame.draw.rect(screen_info, (0, 0, 0), (8, 378, 42, 42), 2)
 
-
-
     def spawn_cord(self):
         """Получение координат спавна для ботов"""
         z = random.randint(0, 3)
@@ -859,12 +769,9 @@ class Game:
             return self.spawn_cord()
         return x, y
 
-
-
     def close(self):
         """Сохранение файлов"""
-        id_zap = self.controlDB.add_world(self.name, self.time + int(time.time()) - int(self.timer),
-                                          self.key, self.x, self.y, self.rud)
+        id_zap = self.controlDB.add_world(self.name, self.time + self.obn, self.key, self.x, self.y, self.rud)
         f = open(f"""map/{id_zap}map.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):
