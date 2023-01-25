@@ -156,7 +156,7 @@ class End(QMainWindow, end.Ui_MainWindow):
                     }""")
         self.initUI()
         self.label_info.setText(f'Общее время игры: {time//60} минут, {time%60}секунд. Уровень: {time//30 + 1}\n'
-                                f'Ключ генерации на котором вы  играли: {key}')
+                                f'Ключ генерации, на котором вы  играли: {key}')
         self.time = time
         self.key = key
 

@@ -38,12 +38,16 @@ tile_images = None
 screen_info = None
 screen_map = None
 screen = None
+sound_g = None
+sound_v = None
 
 
 def restarted():
     global all_sprites, block_group, bots_group, player_group, wall_group, rud_group, mine_group, turel_group
-    global wall_ust_group, ust_block, v_group, tile_images, screen, screen_map, screen_info
-
+    global wall_ust_group, ust_block, v_group, tile_images, screen, screen_map, screen_info, sound_g, sound_v
+    pygame.init()
+    pygame.mixer.music.load('data/music/osn.wav')
+    pygame.mixer.music.play()
     all_sprites = pygame.sprite.Group()
     block_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
@@ -55,7 +59,8 @@ def restarted():
     ust_block = pygame.sprite.Group()
     v_group = pygame.sprite.Group()
     bots_group = pygame.sprite.Group()
-
+    sound_g = pygame.mixer.Sound('data/music/osn.wav')
+    sound_v = pygame.mixer.Sound('data/music/v.wav')
     tile_images = None
     screen_info = None
     screen_map = None
@@ -449,26 +454,30 @@ def circle_collision(left, right):
     distance = Vector2(left.rect.center).distance_to(right.rect.center)
     return distance < left.radius
 
+
 def profile(func):
     """Decorator for run function profile"""
+
     def wrapper(*args, **kwargs):
         profile_filename = func.__name__ + '.prof'
         profiler = cProfile.Profile()
         result = profiler.runcall(func, *args, **kwargs)
         profiler.dump_stats(profile_filename)
         return result
+
     return wrapper
+
 
 class Game:
     """Игра"""
+
     @profile
     def __init__(self, flag, name, key=-1, size=-1):
-        global screen_info, screen_map, screen
+        global screen_info, screen_map, screen, sound_v, sound_g
         restarted()
         screen_info = pygame.Surface((WIDTH - WIDTH_MAP, HEIGHT))
         screen_map = pygame.Surface((WIDTH_MAP, HEIGHT))
         screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.init()
         pygame.key.set_repeat(200, 70)
         global SIZE_MAP
         self.name = name
@@ -576,8 +585,7 @@ class Game:
         self.obn = 0
         self.sec = 0 + self.time % 60
         self.min = 0 + self.time // 60
-
-
+        sound_g.play()
         while running:
             attaks = []
             curl = []
@@ -662,6 +670,7 @@ class Game:
                     curl.append([collided_sprite_bot.rect.center, collided_sprite_ust[0].rect.center])
                     collided_sprite_bot.flag = False
                     if self.obn == 50:
+                        sound_v.play()
                         collided_sprite_ust[0].xp -= collided_sprite_bot.damage
                         if collided_sprite_ust[0].xp <= 0:
                             x, y = collided_sprite_ust[0].x, collided_sprite_ust[0].y
@@ -706,9 +715,8 @@ class Game:
                 self.obn = 0
                 self.rud += self.col_bur
                 self.sec += 1
-                sum1 = summary.summarize(v_group)
-                summary.print_(sum1)
                 for collided_sprite_tur, collided_sprite_bot in collided_sprites.items():
+                    sound_v.play()
                     collided_sprite_bot = collided_sprite_bot[0]
                     if self.rud >= 1:
                         collided_sprite_bot.xp -= collided_sprite_tur.damage
