@@ -62,7 +62,9 @@ def restarted():
     screen = None
 
 
-# fwefwfwfwfwfwfwfwf
+# Загрузка изображений
+
+
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     try:
@@ -81,11 +83,109 @@ def load_image(name, color_key=None):
     return image
 
 
-def load_level(filename):
-    filename = "data/" + filename
-    # читаем уровень, убирая символы перевода строки
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
+# Раскодирование файла карты
+
+def open_file_map(name, x, y):
+    var = name[1:3]
+    if name[0] == 'f':  # фон
+        return Block(var + 'fon', x, y, x, y, 'f', var)
+    elif name[0] == 'r':  # руда
+        return Block(var + 'rud', x, y, x, y, 'r', var, rud_group)
+    elif name[0] == 's':  # стена
+        return Wall(var, x, y, x, y, int(name[3:]))
+    elif name[0] == 'y':  # ядро
+        return Core(x, y, x, y, int(name[3:]), var)
+    elif name[0] == 'm':  # бур
+        return Mine(x, y, x, y, int(name[3:]), var)
+    elif name[0] == 't':  # турель
+        return Turel(x, y, x, y, int(name[3:]), var)
+    elif name[0] == 'w':  # стена само построенная(персом)
+        return Wall_Ust(x, y, x, y, int(name[3:]), var)
+
+
+# Раскодирование файла с ботами
+def open_file_bots(name, x0, y0):
+    bot = Bot(float(name[name.index('#') + 1:name.index(':')]), float(name[name.index(':') + 1:]),
+              x0, y0, int(name[:name.index('#')]))
+    bot.z_rect(x0, y0)
+
+
+# Загрузка уровня
+
+def load_level(filename, x, y):
+    ControlDataBase().del_world(filename)
+    filename0 = "map/" + filename + 'map.txt'
+    with open(filename0, 'r') as mapFile:
+        level_map = [line.split() for line in mapFile]
+
+    board0 = [[open_file_map(level_map[i][j], j, i) for j in range(len(level_map[i]))] for i in range(len(level_map))]
+    os.remove(filename0)
+    filename1 = "map/" + filename + 'play.txt'
+    with open(filename1, 'r') as mapFile:
+        level_map = [line for line in mapFile]
+
+    [open_file_bots(level_map[i], x, y) for i in range(len(level_map))]
+    os.remove(filename1)
+    return board0
+
+
+# Любой объект на поле
+class Entity(pygame.sprite.Sprite):
+    def __init__(self, *alls):
+        super().__init__(*alls)
+
+
+# Простые блоки на поле
+class Block(Entity):
+    def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
+        super(Block, self).__init__(all_sprites, block_group, dop_group)
+        self.image = tile_images[block_type]
+        self.station = station
+        self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.xp = None
+        self.x = x
+        self.biom = biom
+        self.y = y
+
+    # Получение данных о блоке для сохранения в файл
+    def __str__(self):
+        if self.xp is None:
+            return self.station + self.biom
+        else:
+            return self.station + self.biom + str(self.xp)
+
+    # Получение координат блока
+    def get_cords(self):
+        return self.x, self.y
+
+
+# Анимированные блоки на поле
+class AnimatedBlock(Entity):
+    def __init__(self, block_type, pos_x, pos_y, x, y, station, biom, *dop_group):
+        super(Entity, self).__init__(all_sprites, block_group, *dop_group)
+        self.frame = tile_images[block_type]
+        self.image = self.frame[0]
+        self.station = station
+        self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.xp = None
+        self.x = x
+        self.biom = biom
+        self.y = y
+        self.cur_frame = 0
+
+    # Изменение прорисовки изображения
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frame)
+        self.image = self.frame[self.cur_frame]
+
+    # Получение данных о блоке для сохранения в файл
+    def __str__(self):
+        if self.xp is None:
+            return self.station + self.biom
+        else:
+            return self.station + self.biom + str(self.xp)
 
     # Получение координат блока
     def get_cords(self):

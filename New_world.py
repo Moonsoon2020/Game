@@ -54,13 +54,11 @@ class Ui_Form(object):
         self.radioButton_average.setObjectName("radioButton_average")
         self.radioButton_big = QtWidgets.QRadioButton(Form)
         self.radioButton_big.setGeometry(QtCore.QRect(130, 250, 71, 31))
-=======
         self.radioButton_average.setGeometry(QtCore.QRect(130, 237, 111, 20))
         self.radioButton_average.setStyleSheet("color: rgb(255, 153, 70);")
         self.radioButton_average.setObjectName("radioButton_average")
         self.radioButton_big = QtWidgets.QRadioButton(Form)
         self.radioButton_big.setGeometry(QtCore.QRect(130, 250, 111, 31))
->>>>>>> feature10
         self.radioButton_big.setStyleSheet("color: rgb(255, 42, 63);")
         self.radioButton_big.setObjectName("radioButton_big")
         self.create_btn = QtWidgets.QPushButton(Form)
@@ -90,11 +88,8 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-<<<<<<< HEAD
         Form.setWindowTitle(_translate("Form", "Form"))
-=======
         Form.setWindowTitle(_translate("Form", "Новый мир"))
->>>>>>> feature10
         self.name_text.setText(_translate("Form", "Название:"))
         self.accidentally_name_btn.setText(_translate("Form", "Случайно"))
         self.key_text.setText(_translate("Form", "Ключ генерации:"))
