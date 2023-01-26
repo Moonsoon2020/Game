@@ -6,6 +6,9 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import Authos
 import Learning
+import Learning2
+import Learning3
+import Learning4
 import List_Best
 import New_world
 import Start_window
@@ -14,7 +17,6 @@ import end
 from ContolBD import ControlDataBase
 from game import Game
 import pympler
-
 
 names = ['Лихая туча', 'Отметина ночи', 'Грот страха', 'Рой FOGLOFF', 'Континент moon', 'Народ чудес', 'Кратер ужаса',
          'Багряный дракон', 'Карцер небес', 'Печальный серет', 'Месть FOGLOFF', 'Остров солнца', 'Фронт луны']
@@ -155,7 +157,7 @@ class End(QMainWindow, end.Ui_MainWindow):
                         background-position: center;
                     }""")
         self.initUI()
-        self.label_info.setText(f'Общее время игры: {time//60} минут, {time%60}секунд. Уровень: {time//30 + 1}\n'
+        self.label_info.setText(f'Общее время игры: {time // 60} минут, {time % 60}секунд. Уровень: {time // 30 + 1}\n'
                                 f'Ключ генерации на котором вы  играли: {key}')
         self.time = time
         self.key = key
@@ -291,14 +293,16 @@ class Old_world_w(QMainWindow, Old_world.Ui_Form):
                 self.push_start[(i - self.station)].show()
                 self.label_info[(i - self.station)].show()
                 self.push_start[(i - self.station)].clicked.connect(self.start)
-                self.push_start[(i - self.station)].setGeometry(QtCore.QRect(840, 120 + (i - self.station) * 50, 110, 50))
+                self.push_start[(i - self.station)].setGeometry(
+                    QtCore.QRect(840, 120 + (i - self.station) * 50, 110, 50))
                 self.push_start[(i - self.station)].setStyleSheet("font: 16pt \"Berlin Sans FB\"; color: rgb(175,238,"
                                                                   "238);\n "
                                                                   "background-color: rgb(204, 204, 204, 0);")
                 self.push_start[(i - self.station)].info = f"open_{i}"
-                self.label_info[(i - self.station)].setGeometry(QtCore.QRect(120, 120 + (i - self.station) * 50, 720, 50))
+                self.label_info[(i - self.station)].setGeometry(
+                    QtCore.QRect(120, 120 + (i - self.station) * 50, 720, 50))
                 self.label_info[(i - self.station)].setText(f"Мир \"{self.data[i][1]}\". {self.data[i][2] // 60} минут "
-                                            f"{self.data[i][2] % 60} секунд. Уровень {self.data[i][2] // 30 + 1}. ")
+                                                            f"{self.data[i][2] % 60} секунд. Уровень {self.data[i][2] // 30 + 1}. ")
                 self.label_info[(i - self.station)].setObjectName("label_info")
                 self.label_info[(i - self.station)].setStyleSheet("font: 16pt \"Berlin Sans FB\"; color: "
                                                                   "rgb(175,238,238);\n"
@@ -326,12 +330,96 @@ class Learn(QMainWindow, Learning.Ui_Form):
 
     def initUI(self):
         self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
 
     def back(self):
         self.main = StartW()
         self.main.show()
         self.hide()
 
+    def next(self):
+        self.lear = Learning2()
+        self.lear.show()
+        self.hide()
+
+
+class Learning2(QMainWindow, Learning2.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+
+    def back(self):
+        self.lear = Learn()
+        self.lear.show()
+        self.hide()
+
+    def next(self):
+        self.lear = Learning3()
+        self.lear.show()
+        self.hide()
+
+class Learning3(QMainWindow, Learning3.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+
+    def back(self):
+        self.lear = Learning2()
+        self.lear.show()
+        self.hide()
+
+    def next(self):
+        self.lear = Learning4()
+        self.lear.show()
+        self.hide()
+
+class Learning4(QMainWindow, Learning4.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+
+    def back(self):
+        self.lear = Learning3()
+        self.lear.show()
+        self.hide()
+
+    def next(self):
+        self.lear = StartW()
+        self.lear.show()
+        self.hide()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
