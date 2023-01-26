@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Learning.ui'
+# Form implementation generated from reading ui file 'Learning4.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -39,13 +39,8 @@ class Ui_Form(object):
         self.next_btn.setStyleSheet("font: 22pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
 "background-color: rgb(204, 204, 204, 0);")
         self.next_btn.setObjectName("next_btn")
-        self.label = QtWidgets.QLabel(Form)
-        self.label.setGeometry(QtCore.QRect(190, 20, 641, 121))
-        self.label.setStyleSheet("font: 22pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
-"background-color: rgb(204, 204, 204, 0);")
-        self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(Form)
-        self.label_2.setGeometry(QtCore.QRect(0, 120, 1061, 451))
+        self.label_2.setGeometry(QtCore.QRect(0, 0, 1051, 551))
         self.label_2.setStyleSheet("font: 22pt \"Berlin Sans FB\"; color: rgb(175,238,238);\n"
 "background-color: rgb(204, 204, 204, 0);")
         self.label_2.setObjectName("label_2")
@@ -58,5 +53,4 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Обучение"))
         self.back_button.setText(_translate("Form", "Назад"))
         self.next_btn.setText(_translate("Form", "Далее"))
-        self.label.setText(_translate("Form", "<html><head/><body><p align=\"center\">Добро пожаловать в игру</p><p align=\"center\">Flight Of The Clones</p></body></html>"))
-        self.label_2.setText(_translate("Form", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Здесь вам предстоит отстроить собственную базу,</span></p><p align=\"center\"><span style=\" font-weight:600;\">защищищая ее от врагов. </span></p><p align=\"center\"><span style=\" font-weight:600;\">Давайте пройдемся по основам игры...</span></p></body></html>"))
+        self.label_2.setText(_translate("Form", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Отстраивайте свою базу, изучайте новые локации!</span></p><p align=\"center\"><span style=\" font-weight:600;\"><br/></span></p><p align=\"center\"><span style=\" font-weight:600;\">И просто наслаждайтесь игрой!</span></p></body></html>"))

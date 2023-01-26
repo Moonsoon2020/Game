@@ -6,6 +6,9 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import Authos
 import Learning
+import Learning2
+import Learning3
+import Learning4
 import List_Best
 import New_world
 import Start_window
@@ -332,6 +335,109 @@ class Learn(QMainWindow, Learning.Ui_Form):
         self.main.show()
         self.hide()
 
+
+class Learn(QMainWindow, Learning.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+    def back(self):
+        self.main = StartW()
+        self.main.show()
+        self.hide()
+
+    def next(self):
+        self.lear = Learning2()
+        self.lear.show()
+        self.hide()
+
+
+class Learning2(QMainWindow, Learning2.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+    def back(self):
+        self.lear = Learn()
+        self.lear.show()
+        self.hide()
+
+    def next(self):
+        self.lear = Learning3()
+        self.lear.show()
+        self.hide()
+
+
+class Learning3(QMainWindow, Learning3.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+    def back(self):
+        self.lear = Learning2()
+        self.lear.show()
+        self.hide()
+
+    def next(self):
+        self.lear = Learning4()
+        self.lear.show()
+        self.hide()
+
+
+class Learning4(QMainWindow, Learning4.Ui_Form):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setStyleSheet("""QMainWindow {
+                   background-image: url("data/fon.jpg");
+                   background-repeat: no-repeat;
+                   background-position: center;
+               }""")
+        self.initUI()
+
+    def initUI(self):
+        self.back_button.clicked.connect(self.back)
+        self.next_btn.clicked.connect(self.next)
+
+    def back(self):
+        self.lear = Learning3()
+        self.lear.show()
+        self.hide()
+
+    def next(self):
+        self.lear = StartW()
+        self.lear.show()
+        self.hide()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

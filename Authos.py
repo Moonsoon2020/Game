@@ -30,9 +30,9 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Об Авторах"))
         self.back_button.setText(_translate("Form", "Назад"))
         self.label.setText(_translate("Form", "В разработке игры участвовали:\n"
-"Войнов Богдан - главный разработчик,\n"
-"Влад Соков - программист-художник,\n"
-"Софья Брянцева - дизайнер."))
+"Войнов Богдан - Backend разработчик,\n"
+"Соков Владислав - Frontend разработчик,\n"
+"Брянцева Софья - Дизайнер."))

@@ -5,7 +5,6 @@ from ContolBD import ControlDataBase
 import sys
 import time
 from pygame.math import Vector2
-import cProfile
 from pympler import summary
 
 # Константы
@@ -454,24 +453,9 @@ def circle_collision(left, right):
     distance = Vector2(left.rect.center).distance_to(right.rect.center)
     return distance < left.radius
 
-
-def profile(func):
-    """Decorator for run function profile"""
-
-    def wrapper(*args, **kwargs):
-        profile_filename = func.__name__ + '.prof'
-        profiler = cProfile.Profile()
-        result = profiler.runcall(func, *args, **kwargs)
-        profiler.dump_stats(profile_filename)
-        return result
-
-    return wrapper
-
-
 class Game:
     """Игра"""
 
-    @profile
     def __init__(self, flag, name, key=-1, size=-1):
         global screen_info, screen_map, screen, sound_v, sound_g
         restarted()
