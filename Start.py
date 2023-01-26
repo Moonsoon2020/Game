@@ -16,8 +16,6 @@ import Old_world
 import end
 from ContolBD import ControlDataBase
 from game import Game
-import pympler
-
 
 names = ['Лихая туча', 'Отметина ночи', 'Грот страха', 'Рой FOGLOFF', 'Континент moon', 'Народ чудес', 'Кратер ужаса',
          'Багряный дракон', 'Карцер небес', 'Печальный серет', 'Месть FOGLOFF', 'Остров солнца', 'Фронт луны']
@@ -40,6 +38,7 @@ class StartW(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):
         self.Authors.clicked.connect(self.open_authors)
         self.dowloand_button.clicked.connect(self.open_download)
         self.learn_btn.clicked.connect(self.open_learn)
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
 
     def open_game(self):
         self.n_world = New_world_window()
@@ -88,6 +87,7 @@ class ListBest(QMainWindow, List_Best.Ui_List_Best):
         self.station = 0
         self.push_start = []
         self.label_info = []
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
         for i in range(0, 5):
             self.label_info.append(QtWidgets.QLabel(self))
             # self.push_start[-1].close()
@@ -140,6 +140,7 @@ class Authors(QMainWindow, Authos.Ui_Form):
         self.initUI()
 
     def initUI(self):
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
         self.back_button.clicked.connect(self.back)
 
     def back(self):
@@ -158,7 +159,7 @@ class End(QMainWindow, end.Ui_MainWindow):
                         background-position: center;
                     }""")
         self.initUI()
-        self.label_info.setText(f'Общее время игры: {time//60} минут, {time%60}секунд. Уровень: {time//30 + 1}\n'
+        self.label_info.setText(f'Общее время игры: {time // 60} минут, {time % 60}секунд. Уровень: {time // 30 + 1}\n'
                                 f'Ключ генерации, на котором вы  играли: {key}')
         self.time = time
         self.key = key
@@ -193,6 +194,7 @@ class New_world_window(QMainWindow, New_world.Ui_Form):
         self.accidentally_key_btn.clicked.connect(self.accidentally_key_rev)
         self.accidentally_key_rev()
         self.accidentally_name_rev()
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
 
     def accidentally_key_rev(self):
         self.textEdit_2.setText(str(random.randint(0, 100000000)))
@@ -252,6 +254,7 @@ class Old_world_w(QMainWindow, Old_world.Ui_Form):
         self.data = control.get_worlds()
         self.push_start = []
         self.label_info = []
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
         for i in range(0, 5):
             self.push_start.append(QtWidgets.QPushButton(self))
             self.label_info.append(QtWidgets.QLabel(self))
@@ -294,14 +297,16 @@ class Old_world_w(QMainWindow, Old_world.Ui_Form):
                 self.push_start[(i - self.station)].show()
                 self.label_info[(i - self.station)].show()
                 self.push_start[(i - self.station)].clicked.connect(self.start)
-                self.push_start[(i - self.station)].setGeometry(QtCore.QRect(840, 120 + (i - self.station) * 50, 110, 50))
+                self.push_start[(i - self.station)].setGeometry(
+                    QtCore.QRect(840, 120 + (i - self.station) * 50, 110, 50))
                 self.push_start[(i - self.station)].setStyleSheet("font: 16pt \"Berlin Sans FB\"; color: rgb(175,238,"
                                                                   "238);\n "
                                                                   "background-color: rgb(204, 204, 204, 0);")
                 self.push_start[(i - self.station)].info = f"open_{i}"
-                self.label_info[(i - self.station)].setGeometry(QtCore.QRect(120, 120 + (i - self.station) * 50, 720, 50))
+                self.label_info[(i - self.station)].setGeometry(
+                    QtCore.QRect(120, 120 + (i - self.station) * 50, 720, 50))
                 self.label_info[(i - self.station)].setText(f"Мир \"{self.data[i][1]}\". {self.data[i][2] // 60} минут "
-                                            f"{self.data[i][2] % 60} секунд. Уровень {self.data[i][2] // 30 + 1}. ")
+                                                            f"{self.data[i][2] % 60} секунд. Уровень {self.data[i][2] // 30 + 1}. ")
                 self.label_info[(i - self.station)].setObjectName("label_info")
                 self.label_info[(i - self.station)].setStyleSheet("font: 16pt \"Berlin Sans FB\"; color: "
                                                                   "rgb(175,238,238);\n"
@@ -329,27 +334,8 @@ class Learn(QMainWindow, Learning.Ui_Form):
 
     def initUI(self):
         self.back_button.clicked.connect(self.back)
-
-    def back(self):
-        self.main = StartW()
-        self.main.show()
-        self.hide()
-
-
-class Learn(QMainWindow, Learning.Ui_Form):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.setStyleSheet("""QMainWindow {
-                   background-image: url("data/fon.jpg");
-                   background-repeat: no-repeat;
-                   background-position: center;
-               }""")
-        self.initUI()
-
-    def initUI(self):
-        self.back_button.clicked.connect(self.back)
         self.next_btn.clicked.connect(self.next)
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
 
     def back(self):
         self.main = StartW()
@@ -376,6 +362,7 @@ class Learning2(QMainWindow, Learning2.Ui_Form):
     def initUI(self):
         self.back_button.clicked.connect(self.back)
         self.next_btn.clicked.connect(self.next)
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
 
     def back(self):
         self.lear = Learn()
@@ -402,6 +389,7 @@ class Learning3(QMainWindow, Learning3.Ui_Form):
     def initUI(self):
         self.back_button.clicked.connect(self.back)
         self.next_btn.clicked.connect(self.next)
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
 
     def back(self):
         self.lear = Learning2()
@@ -428,6 +416,7 @@ class Learning4(QMainWindow, Learning4.Ui_Form):
     def initUI(self):
         self.back_button.clicked.connect(self.back)
         self.next_btn.clicked.connect(self.next)
+        self.setWindowIcon(QtGui.QIcon('data/bot.png'))
 
     def back(self):
         self.lear = Learning3()
@@ -438,6 +427,7 @@ class Learning4(QMainWindow, Learning4.Ui_Form):
         self.lear = StartW()
         self.lear.show()
         self.hide()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

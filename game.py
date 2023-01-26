@@ -5,7 +5,6 @@ from ContolBD import ControlDataBase
 import sys
 import time
 from pygame.math import Vector2
-from pympler import summary
 
 # Константы
 FPS = 50
@@ -41,6 +40,7 @@ sound_g = None
 sound_v = None
 
 
+# Updaters
 def restarted():
     global all_sprites, block_group, bots_group, player_group, wall_group, rud_group, mine_group, turel_group
     global wall_ust_group, ust_block, v_group, tile_images, screen, screen_map, screen_info, sound_g, sound_v
@@ -452,6 +452,7 @@ class Camera:
 def circle_collision(left, right):
     distance = Vector2(left.rect.center).distance_to(right.rect.center)
     return distance < left.radius
+
 
 class Game:
     """Игра"""
