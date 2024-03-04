@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ContolBD import ControlDataBase
-from UIWindow import New_world
+from PyQt5 import QtGui
+from src.database.ContolBD import ControlDataBase
+from src.UIWindow import New_world
 import random
-from UIRealization.EndWindow import End
-from game import Game
+from src.UIRealization.EndWindow import End
+from src.game.main import Game
+from src.constans.constant import names
 
 
 class New_world_window(QMainWindow, New_world.Ui_Form):

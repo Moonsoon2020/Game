@@ -2,10 +2,10 @@ import random
 
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5 import QtCore, QtGui, QtWidgets
-from ContolBD import ControlDataBase
-from UIRealization.EndWindow import End
-from UIWindow import Old_world
-from game import Game
+from src.database.ContolBD import ControlDataBase
+from src.UIRealization.EndWindow import End
+from src.UIWindow import Old_world
+from src.game.main import Game
 
 
 class Old_world_w(QMainWindow, Old_world.Ui_Form):

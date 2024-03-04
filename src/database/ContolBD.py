@@ -3,7 +3,7 @@ import sqlite3
 
 class ControlDataBase:
     def __init__(self):
-        self.con = sqlite3.connect('db_for_game.db', check_same_thread=False)  # подключение БД
+        self.con = sqlite3.connect('../../db_for_game.db', check_same_thread=False)  # подключение БД
         tabl1 = '''CREATE TABLE IF NOT EXISTS BestPlayers (
                    ID             INTEGER  PRIMARY KEY NOT NULL,
                    name           TEXT     NOT NULL,

@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ContolBD import ControlDataBase
-from UIWindow import Learn
+from PyQt5 import QtCore, QtGui
+from src.UIWindow import Learn
 class Learn(QMainWindow, Learn.Ui_Form):
     def __init__(self, obj):
         self.status = 1

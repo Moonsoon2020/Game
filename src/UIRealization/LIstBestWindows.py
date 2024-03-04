@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-from ContolBD import ControlDataBase
-from UIWindow import List_Best
+from src.database.ContolBD import ControlDataBase
+from src.UIWindow import List_Best
 
 
 class ListBest(QMainWindow, List_Best.Ui_List_Best):

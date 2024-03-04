@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
-from UIWindow import Authos
+from PyQt5 import QtGui
+from src.UIWindow import Authos
 class Authors(QMainWindow, Authos.Ui_Form):
     def __init__(self, obj):
         super().__init__()

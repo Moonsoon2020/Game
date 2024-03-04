@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui
 
-from UIRealization.AuthorsWindows import Authors
-from UIRealization.LIstBestWindows import ListBest
-from UIRealization.LearnWindow import Learn
-from UIRealization.NewWorldWindow import New_world_window
-from UIRealization.OldWorldWindow import Old_world_w
-from UIWindow import Start_window
+from src.UIRealization.AuthorsWindows import Authors
+from src.UIRealization.LIstBestWindows import ListBest
+from src.UIRealization.LearnWindow import Learn
+from src.UIRealization.NewWorldWindow import New_world_window
+from src.UIRealization.OldWorldWindow import Old_world_w
+from src.UIWindow import Start_window
 
 
 class StartW(QMainWindow, Start_window.Ui_Flight_Of_The_Clones):

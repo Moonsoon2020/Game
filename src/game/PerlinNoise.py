@@ -151,22 +151,22 @@ class PerlinNoiseFactory(object):
 
         return ret
 
+if __name__ == '__main__':
+    import PIL.Image
 
-# import PIL.Image
-#
-# size = 200
-# res = 40
-# frames = 1
-# space_range = size//res
-#
-# pnf = PerlinNoiseFactory(v2, octaves=4, tile=(space_range, space_range))
-#
-# for t in range(frames):
-#     img = PIL.Image.new('RGB', (size, size))
-#     for x in range(size):
-#         for y in range(size):
-#             n = pnf(x/res, y/res)
-#             img.putpixel((x, y), int((n + 1) / v2 * 255 + 0.5))
-#
-#     img.save("noiseframe{:03d}.png".format(t))
-#     print(t)
+    size = 60
+    res = 3
+    frames = 1
+    space_range = size//res
+
+    pnf = PerlinNoiseFactory(2, octaves=1, tile=(space_range, space_range))
+
+    for t in range(frames):
+        img = PIL.Image.new('RGB', (size, size))
+    for x in range(size):
+        for y in range(size):
+            n = pnf(x/res, y/res)
+            img.putpixel((x, y), int((n + 1) / 2 * 255 + 0.5))
+
+    img.save("noiseframe{:03d}.png".format(t))
+    print(t)

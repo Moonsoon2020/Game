@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ContolBD import ControlDataBase
-from UIWindow import end
+from src.database.ContolBD import ControlDataBase
+from src.UIWindow import end
+
+
 class End(QMainWindow, end.Ui_MainWindow):
     def __init__(self, time, key, obj):
         super().__init__()
