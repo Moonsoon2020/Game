@@ -150,23 +150,30 @@ class PerlinNoiseFactory(object):
             ret = r * 2 - 1
 
         return ret
+def get_color(n):
+    if n < 0:
+        return (0, 255, 0)
+    if (n < 0.5):
+        return (0, 0, 255)
+    return (255, 0, 0)
+    # return int((n + 1) / 2 * 255 + 0.5)
+
 
 if __name__ == '__main__':
     import PIL.Image
 
-    size = 60
-    res = 3
-    frames = 1
-    space_range = size//res
+    size = 2000
+    res = 4
+    space_range = size // res
 
-    pnf = PerlinNoiseFactory(2, octaves=1, tile=(space_range, space_range))
+    pnf = PerlinNoiseFactory(2, octaves=2, tile=(space_range, space_range))
 
-    for t in range(frames):
-        img = PIL.Image.new('RGB', (size, size))
+    # for t in range(frames):
+    img = PIL.Image.new('RGB', (size, size))
     for x in range(size):
         for y in range(size):
-            n = pnf(x/res, y/res)
-            img.putpixel((x, y), int((n + 1) / 2 * 255 + 0.5))
+            n = pnf(x / res, y / res)
+            img.putpixel((x, y), get_color(n * 1.5))
 
-    img.save("noiseframe{:03d}.png".format(t))
-    print(t)
+    img.save("noiseframe{:03d}.png".format(0))
+    # print(t)

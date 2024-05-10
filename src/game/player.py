@@ -9,6 +9,7 @@ class Player(MoveableEntity):
             player_group, pos_x, pos_y)
         self.image = getimage("mar")
         self.mask = pygame.mask.from_surface(self.image)
+        self.start_cords = [pos_x, pos_y]
         self.rect = self.image.get_rect().move(TILE_WIDTH * pos_x, TILE_WIDTH * pos_y)
         self.width = width
         self.height = height
@@ -38,6 +39,6 @@ class Player(MoveableEntity):
                 self.rect.y += step
 
     def remove_cord_for_m(self, step_x, step_y):
-        self.cords = [self.rect.x // TILE_WIDTH, self.rect.y // TILE_WIDTH]
+        self.cords = [self.start_cords[0], self.start_cords[1]]
         self.rect.x += step_x
         self.rect.y += step_y
