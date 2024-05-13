@@ -7,7 +7,7 @@ def restarted():
     global all_sprites, block_group, bots_group, player_group, wall_group, rud_group, mine_group, turel_group
     global wall_ust_group, ust_block, v_group, tile_images, screen, screen_map, screen_info, sound_g, sound_v
     pygame.init()
-    pygame.mixer.music.load('data/music/osn.wav')
+    # pygame.mixer.music.load('data/music/osn.wav')
     # pygame.mixer.music.play()
     all_sprites = pygame.sprite.Group()
     block_group = pygame.sprite.Group()

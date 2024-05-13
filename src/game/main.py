@@ -13,12 +13,11 @@ from src.game.entity import AnimatedBlock, Block, Mine, Wall_Ust, Core, Turel
 from src.game.screen_info import ScreenInfo
 from src.database.ContolBD import ControlDataBase
 
-
-
 class Game:
     """Игра"""
 
     def __init__(self, flag, name, key=-1, size=-1):
+        self.running = None
         self.init_game(name)
         # Загрузка всех изображений
         if flag:
@@ -79,15 +78,24 @@ class Game:
     def play(self):
         """Процесс игры"""
         clock = pygame.time.Clock()
-        running = True
+        self.running = True
         self.obn = 0
         self.sec = 0 + self.time % 60
         self.min = 0 + self.time // 60
-        while running:
+        while self.running:
             self.handle_events()
             self.spawn_bots()
             self.update_entities()
             curl, attaks = self.check_collisions()
+            if not self.running:
+                if isinstance(curl, int):
+                    for i in bots_group:
+                        i.kill()
+                    self.board_pole = None
+                    pygame.quit()
+                    return [curl, attaks]
+                else:
+                    return []
             self.update_screen(clock, attaks, curl)
             self.obn += 1
             clock.tick(FPS)
@@ -169,7 +177,9 @@ class Game:
                         collided_sprite_bot.flag = True
                         if self.player.start_cords[1] == y and self.player.start_cords[0] == x:
                             pygame.quit()
+                            self.running = False
                             return self.time + int(time.time()) - int(self.timer), self.key
+
                         if isinstance(self.board_pole[y][x], Mine):
                             self.col_bur -= 1
                         if random.randint(0, 10) == 0:
@@ -323,6 +333,7 @@ class Game:
         return x, y
 
     def close(self):
+        self.running = False
         """Сохранение файлов"""
         id_zap = self.controlDB.add_world(self.name, self.time + self.obn, self.key, self.player.start_cords[0], self.player.start_cords[1], self.rud)
         f = open(f"""map/{id_zap}map.txt""", 'w')
@@ -338,6 +349,7 @@ class Game:
                 print(i, file=f)
             i.kill()
         f.close()
+        self.board_pole = None
         pygame.quit()
 
     def handle_movement(self, event):
