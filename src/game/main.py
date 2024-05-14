@@ -13,6 +13,7 @@ from src.game.entity import AnimatedBlock, Block, Mine, Wall_Ust, Core, Turel
 from src.game.screen_info import ScreenInfo
 from src.database.ContolBD import ControlDataBase
 
+
 class Game:
     """Игра"""
 
@@ -88,18 +89,21 @@ class Game:
             self.update_entities()
             curl, attaks = self.check_collisions()
             if not self.running:
-                if isinstance(curl, int):
-                    for i in bots_group:
-                        i.kill()
-                    self.board_pole = None
-                    pygame.quit()
-                    return [curl, attaks]
-                else:
-                    return []
+                return self.end(curl, attaks)
             self.update_screen(clock, attaks, curl)
             self.obn += 1
             clock.tick(FPS)
             self.allowed_to_move = True
+
+    def end(self, curl, attaks):
+        if isinstance(curl, int):
+            for i in bots_group:
+                i.kill()
+            self.board_pole = None
+            pygame.quit()
+            return [curl, attaks]
+        else:
+            return []
 
     def handle_events(self):
         """Обработка событий игры"""
@@ -132,7 +136,7 @@ class Game:
                 sprite.update()
 
     def check_collisions(self):
-        """Проверка на столкновения"""# проверка на столкновения
+        """Проверка на столкновения"""  # проверка на столкновения
         curl, attaks = [], []
         collided_sprites = pygame.sprite.groupcollide(bots_group, wall_group, False,
                                                       False)
@@ -245,6 +249,7 @@ class Game:
         self.screen.blit(self.screen_map, (0, 0))
         self.screen.blit(self.screeninfo_obj.screen_info, (WIDTH_MAP, 0))
         pygame.display.flip()
+
     def add(self, xp):
         """Спавн ботов"""
         x, y = self.spawn_cord()
@@ -253,7 +258,8 @@ class Game:
 
     def restart(self):
         """Возвращение на точку спавна"""
-        self.player.remove_cord_for_m( (self.player.start_cords[0] - self.player.cords[0]) * TILE_WIDTH, (self.player.start_cords[1] - self.player.cords[1]) * TILE_WIDTH )
+        self.player.remove_cord_for_m((self.player.start_cords[0] - self.player.cords[0]) * TILE_WIDTH,
+                                      (self.player.start_cords[1] - self.player.cords[1]) * TILE_WIDTH)
 
     def click(self, pos):
         """Обработка кликов"""
@@ -274,7 +280,7 @@ class Game:
         else:
             # поле и спавн построек
             pos = int(pos[0] // TILE_WIDTH + self.player.cords[0] - KRAY), \
-                  int(pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY)
+                int(pos[1] // TILE_WIDTH + self.player.cords[1] - KRAY)
             print(pos)
             if self.rud >= 50 and self.position == 'bur' and \
                     (self.board_pole[pos[1]][pos[0]].station == 'm' or self.board_pole[pos[1]][pos[0]].station == 'r'):
@@ -335,7 +341,8 @@ class Game:
     def close(self):
         self.running = False
         """Сохранение файлов"""
-        id_zap = self.controlDB.add_world(self.name, self.time + self.obn, self.key, self.player.start_cords[0], self.player.start_cords[1], self.rud)
+        id_zap = self.controlDB.add_world(self.name, self.time + self.obn, self.key, self.player.start_cords[0],
+                                          self.player.start_cords[1], self.rud)
         f = open(f"""map/{id_zap}map.txt""", 'w')
         for i in range(len(self.board_pole)):
             for j in range(len(self.board_pole[i])):

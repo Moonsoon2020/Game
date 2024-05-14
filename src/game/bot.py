@@ -26,8 +26,6 @@ class Bot(MoveableEntity):
         self.step_x = self.delta_x / 30
         self.step_y = self.delta_y / 30
         self.flag = True
-        self.smes_x = 0
-        self.smes_y = 0
         self.radius = 7 * TILE_WIDTH
         self.damage = 60
 

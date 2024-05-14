@@ -3,3 +3,4 @@
 /.venv
 /build
 /map/
+db_for_game.db
